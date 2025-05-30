@@ -1,0 +1,109 @@
+- name:  Deploy new spine switch
+  hosts: device_roles_dc-spine
+  gather_facts: no
+
+  tasks:
+  - name: Enable features
+    cisco.nxos.nxos_feature:
+        feature: "{{ item }}"
+    loop: "{{ spine_features }}"
+
+  - name: Configure hostname
+    cisco.nxos.nxos_hostname:
+      config:
+        hostname: "{{ hostname }}"
+
+  - name: Configure loopback interfaces
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "loopback {{ item.id }}"
+          enabled: true
+    loop: "{{ loopbacks }}"
+
+  - name: Configure loopback interfaces - ip address
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "loopback {{ item.id }}"
+          ipv4:
+            -   address: "{{ item.address }}/32"
+    loop: "{{ loopbacks }}"
+
+  - name: Configure underlay interfaces
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "Ethernet{{ item.interface_id }}"
+          description: "{{ item.desc }}"
+          mtu: 9216
+          enabled: true
+          mode: layer3
+    loop: "{{ underlay_interfaces }}"
+
+  - name: Configure underlay interfaces - ip address
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "Ethernet{{ item.interface_id }}"
+          ipv4:
+            - address: "{{ item.address }}"
+    loop: "{{ underlay_interfaces }}"
+
+  - name: Enable OSPF (default VRF)
+    cisco.nxos.nxos_ospfv2:
+      config:
+        processes:
+          - process_id: "{{ ospf.name }}"
+            areas:
+              - area_id: "{{ ospf.area }}"
+                authentication:
+                  message_digest: true
+            auto_cost:
+              reference_bandwidth: "{{ ospf.bandwidth_reference }}"
+              unit: "Mbps"
+    when: ospf.vrf == "default"
+
+  - name: Enable OSPF (non-default VRF)
+    cisco.nxos.nxos_ospfv2:
+      config:
+        processes:
+          - process_id: "{{ ospf.name }}"
+            vrfs:
+              - vrf: "{{ ospf.vrf }}"
+                areas:
+                  - area_id: "{{ ospf.area }}"
+                    authentication:
+                      message_digest: true
+            auto_cost:
+              reference_bandwidth: "{{ ospf.bandwidth_reference }}"
+              unit: "Mbps"
+    when: ospf.vrf != "default"
+
+  - name: Enable OSPF over loopback interfaces
+    cisco.nxos.nxos_ospf_interfaces:
+        config:
+        - name: "loopback {{ item.id }}"
+          address_family:
+            - afi: ipv4
+              processes:
+                - process_id: "{{ ospf.name }}"
+                  area:
+                    area_id: "{{ ospf.area }}"
+    loop: "{{ loopbacks }}"
+
+  - name: Enable OSPF over underlay_interfaces interfaces
+    cisco.nxos.nxos_ospf_interfaces:
+        config:
+        - name: "Ethernet{{ item.interface_id }}"
+          address_family:
+            - afi: ipv4
+              processes:
+                - process_id: "{{ ospf.name }}"
+                  area:
+                    area_id: "{{ ospf.area }}"
+              authentication:
+                enable: true
+                message_digest: true
+              message_digest_key:
+                encryption: 0
+                key: "{{ ospf.md_key.key }}"
+                key_id: "{{ ospf.md_key.key_id }}"
+    loop: "{{ underlay_interfaces }}"
+
