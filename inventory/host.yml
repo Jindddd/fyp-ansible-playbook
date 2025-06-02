@@ -1,0 +1,25 @@
+all:
+  hosts:
+    leaf1:
+      ansible_host: 172.20.20.4
+      ansible_user: admin
+      ansible_password: admin
+      ansible_network_os: cisco.nxos.nxos
+    leaf1:
+      ansible_host: 172.20.20.7
+      ansible_user: admin
+      ansible_password: admin
+      ansible_network_os: cisco.nxos.nxos
+
+
+    spine1:
+      ansible_host: 172.20.20.6
+      ansible_user: admin
+      ansible_password: admin
+      ansible_network_os: cisco.nxos.nxos
+
+    spine1:
+      ansible_host: 172.20.20.3
+      ansible_user: admin
+      ansible_password: admin
+      ansible_network_os: cisco.nxos.nxos
