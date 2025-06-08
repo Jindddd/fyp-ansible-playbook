@@ -1,0 +1,4 @@
+hostname: "Leaf2"
+loopbacks:
+  - id: 0
+    address: "2.2.2.2/32"

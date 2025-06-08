@@ -1,0 +1,7 @@
+features:
+  - ospf
+  - bgp
+  - interface-vlan
+  - vn-segment-vlan-based
+  - nv overlay
+  - fabric forwarding

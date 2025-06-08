@@ -1,0 +1,10 @@
+hostname: "Leaf1"
+loopbacks:
+  - id: 0
+    address: "1.1.1.1/32"
+
+underlay_interfaces:
+  - name: "1/1"
+    address: "10.0.12.1/31"
+  - name: "1/2"
+    address: "10.0.13.1/31"

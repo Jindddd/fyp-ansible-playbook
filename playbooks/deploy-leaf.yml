@@ -1,4 +1,4 @@
-- name:  Deploy new LEAF switch
+- name:  Deploy new leaf switch
   hosts: leafs
   gather_facts: no
 
@@ -6,11 +6,15 @@
   - name: Enable features
     cisco.nxos.nxos_feature:
         feature: "{{ item }}"
-    loop: "{{ features.leaf }}"
+    loop: "{{ features }}"
 
   - name: Enable overlay EVPN
     cisco.nxos.nxos_evpn_global:
       nv_overlay_evpn: true
+
+  - name: Chagen the system mtu to 9216
+    cisco.nxos.nxos_system:
+      system_mtu: 9216
 
   - name: Configure hostname
     cisco.nxos.nxos_hostname:
@@ -36,7 +40,6 @@
     cisco.nxos.nxos_interfaces:
       config:
         - name: "Ethernet{{ item.id }}"
-          description: "{{ item.desc }}"
           mtu: 9216
           enabled: true
           mode: layer3
@@ -50,35 +53,12 @@
             - address: "{{ item.address }}"
     loop: "{{ underlay_interfaces }}"
 
-  - name: Enable OSPF (default VRF)
+  - name: Enable OSPF
     cisco.nxos.nxos_ospfv2:
       config:
         processes:
           - process_id: "{{ ospf.name }}"
-            areas:
-              - area_id: "{{ ospf.area }}"
-                authentication:
-                  message_digest: true
-            auto_cost:
-              reference_bandwidth: "{{ ospf.bandwidth_reference }}"
-              unit: "Mbps"
-    when: ospf.vrf == "default"
-
-  - name: Enable OSPF (non-default VRF)
-    cisco.nxos.nxos_ospfv2:
-      config:
-        processes:
-          - process_id: "{{ ospf.name }}"
-            vrfs:
-              - vrf: "{{ ospf.vrf }}"
-                areas:
-                  - area_id: "{{ ospf.area }}"
-                    authentication:
-                      message_digest: true
-            auto_cost:
-              reference_bandwidth: "{{ ospf.bandwidth_reference }}"
-              unit: "Mbps"
-    when: ospf.vrf != "default"
+            router_id: "{{ loopbacks[0].address | ansible.utils.ipaddr('address') }}"
 
   - name: Enable OSPF over loopback interfaces
     cisco.nxos.nxos_ospf_interfaces:
@@ -102,188 +82,181 @@
                 - process_id: "{{ ospf.name }}"
                   area:
                     area_id: "{{ ospf.area }}"
-              authentication:
-                enable: true
-                message_digest: true
-              message_digest_key:
-                encryption: 0
-                key: "{{ ospf.md_key.key }}"
-                key_id: "{{ ospf.md_key.key_id }}"
     loop: "{{ underlay_interfaces }}"
 
-  - name: Enable BGP
-    cisco.nxos.nxos_bgp_global:
-      config:
-        as_number: "{{ bgp.asn }}"
+  # - name: Enable BGP
+  #   cisco.nxos.nxos_bgp_global:
+  #     config:
+  #       as_number: "{{ bgp.asn }}"
         
-  - name: Create BGP neighbors template
-    cisco.nxos.nxos_bgp_templates:
-      config:
-        as_number: "{{ bgp.asn }}"
-        neighbor:
-          - name: SPINE_PEERS
-            remote_as: "{{ bgp.asn }}"
-            update_source: "loopback {{ loopbacks[0].id }}"
-            address_family:
-                - afi: l2vpn
-                  safi: evpn
-                  send_community: both
-                - afi: ipv4
-                  safi: unicast
-                  send_community: both
-                - afi: ipv6
-                  safi: unicast
-                  send_community: both
+  # - name: Create BGP neighbors template
+  #   cisco.nxos.nxos_bgp_templates:
+  #     config:
+  #       as_number: "{{ bgp.asn }}"
+  #       neighbor:
+  #         - name: SPINE_PEERS
+  #           remote_as: "{{ bgp.asn }}"
+  #           update_source: "loopback {{ loopbacks[0].id }}"
+  #           address_family:
+  #               - afi: l2vpn
+  #                 safi: evpn
+  #                 send_community: both
+  #               - afi: ipv4
+  #                 safi: unicast
+  #                 send_community: both
+  #               - afi: ipv6
+  #                 safi: unicast
+  #                 send_community: both
 
 
-  - name: Add BGP neighbors
-    cisco.nxos.nxos_bgp_global:
-      config:
-        as_number: "{{ bgp.asn }}"
-        neighbors:
-              - neighbor_address: "{{ item }}"
-                inherit:
-                  peer: SPINE_PEERS
-    loop: "{{ bgp_neighbors }}"
+  # - name: Add BGP neighbors
+  #   cisco.nxos.nxos_bgp_global:
+  #     config:
+  #       as_number: "{{ bgp.asn }}"
+  #       neighbors:
+  #             - neighbor_address: "{{ item }}"
+  #               inherit:
+  #                 peer: SPINE_PEERS
+  #   loop: "{{ bgp_neighbors }}"
   
-  - name: Create VTEP with BGP learning
-    cisco.nxos.nxos_vxlan_vtep:
-      interface: nve1
-      host_reachability: true
-      source_interface: "loopback {{ loopbacks[0].id }}"
-      shutdown: false
+  # - name: Create VTEP with BGP learning
+  #   cisco.nxos.nxos_vxlan_vtep:
+  #     interface: nve1
+  #     host_reachability: true
+  #     source_interface: "loopback {{ loopbacks[0].id }}"
+  #     shutdown: false
     
-  - name: Set anycast MAC
-    cisco.nxos.nxos_overlay_global:
-      anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
+  # - name: Set anycast MAC
+  #   cisco.nxos.nxos_overlay_global:
+  #     anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
 
-  - name: Set value based on switch's VPC role
-    set_fact:
-      role_priority: "{{ '100' if vpc.role == 'primary' else '200' }}"
-      system_priority: "{{ vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='system_priority') | first }}"
-      is_peer_gw_enabled: "{{ 'true' if vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='peer_gateway') | first == 'enabled' else 'false' }}"
-      keepalive_subnet: "{{ vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='keepalive_subnet') | first }}"
-      keepalive_vrf : "{{ vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='keepalive_vrf') | first }}"
-      src_ip_offset: "{{ '1' if vpc.role == 'primary' else '2' }}"
-      dst_ip_offset: "{{ '2' if vpc.role == 'primary' else '1' }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Set value based on switch's VPC role
+  #   set_fact:
+  #     role_priority: "{{ '100' if vpc.role == 'primary' else '200' }}"
+  #     system_priority: "{{ vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='system_priority') | first }}"
+  #     is_peer_gw_enabled: "{{ 'true' if vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='peer_gateway') | first == 'enabled' else 'false' }}"
+  #     keepalive_subnet: "{{ vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='keepalive_subnet') | first }}"
+  #     keepalive_vrf : "{{ vpc_all.domains | selectattr('domain_id', 'equalto', vpc.domain_id) | map(attribute='keepalive_vrf') | first }}"
+  #     src_ip_offset: "{{ '1' if vpc.role == 'primary' else '2' }}"
+  #     dst_ip_offset: "{{ '2' if vpc.role == 'primary' else '1' }}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name : Set source ip address for keep alive
-    set_fact:
-      keepalive_src_ip: "{{ keepalive_subnet | ansible.utils.ipaddr('net') | ansible.utils.ipaddr(src_ip_offset) | ansible.utils.ipaddr('address')}}"
-      keepalive_dst_ip: "{{ keepalive_subnet | ansible.utils.ipaddr('net') | ansible.utils.ipaddr(dst_ip_offset) | ansible.utils.ipaddr('address')}}"
-    when: vpc.is_vpc_switch == true
+  # - name : Set source ip address for keep alive
+  #   set_fact:
+  #     keepalive_src_ip: "{{ keepalive_subnet | ansible.utils.ipaddr('net') | ansible.utils.ipaddr(src_ip_offset) | ansible.utils.ipaddr('address')}}"
+  #     keepalive_dst_ip: "{{ keepalive_subnet | ansible.utils.ipaddr('net') | ansible.utils.ipaddr(dst_ip_offset) | ansible.utils.ipaddr('address')}}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Enable VPC feature
-    cisco.nxos.nxos_feature:
-        feature: "vpc"
-    when: vpc.is_vpc_switch == true
+  # - name: Enable VPC feature
+  #   cisco.nxos.nxos_feature:
+  #       feature: "vpc"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure the keepalive vrf
-    cisco.nxos.nxos_vrf:
-      name: "{{ keepalive_vrf }}"
-      state: present
-    when: vpc.is_vpc_switch == true
+  # - name: Configure the keepalive vrf
+  #   cisco.nxos.nxos_vrf:
+  #     name: "{{ keepalive_vrf }}"
+  #     state: present
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure VPC
-    cisco.nxos.nxos_vpc:
-      domain: "{{ vpc.domain_id }}"
-      role_priority: "{{ role_priority }}"
-      system_priority: "{{ system_priority }}"
-      peer_gw: "{{ is_peer_gw_enabled }}"
-      pkl_src: "{{ keepalive_src_ip }}"
-      pkl_dest: "{{ keepalive_dst_ip }}"
-      pkl_vrf: "{{ keepalive_vrf }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure VPC
+  #   cisco.nxos.nxos_vpc:
+  #     domain: "{{ vpc.domain_id }}"
+  #     role_priority: "{{ role_priority }}"
+  #     system_priority: "{{ system_priority }}"
+  #     peer_gw: "{{ is_peer_gw_enabled }}"
+  #     pkl_src: "{{ keepalive_src_ip }}"
+  #     pkl_dest: "{{ keepalive_dst_ip }}"
+  #     pkl_vrf: "{{ keepalive_vrf }}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure keep alive LACP - enable members
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "ethernet {{ item.interface }}"
-          enabled: true
-    loop: "{{ vpc.keepalive_portchannel_members }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure keep alive LACP - enable members
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "ethernet {{ item.interface }}"
+  #         enabled: true
+  #   loop: "{{ vpc.keepalive_portchannel_members }}"
+  #   when: vpc.is_vpc_switch == true
   
-  - name: Configure keep alive LACP - create LAGs
-    cisco.nxos.nxos_lag_interfaces:
-      config:
-        - name: "port-channel {{ vpc.keepalive_portchannel_id }}"
-          members: "{{ ((['Ethernet'] | product(vpc.keepalive_portchannel_members | map(attribute='interface')) | map('join')) | map('community.general.dict_kv', 'member')) | map('combine', {'mode': 'active'}) }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure keep alive LACP - create LAGs
+  #   cisco.nxos.nxos_lag_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.keepalive_portchannel_id }}"
+  #         members: "{{ ((['Ethernet'] | product(vpc.keepalive_portchannel_members | map(attribute='interface')) | map('join')) | map('community.general.dict_kv', 'member')) | map('combine', {'mode': 'active'}) }}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure keep alive LACP - enable port-channels
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "port-channel {{ vpc.keepalive_portchannel_id }}"
-          enabled: true
-          mode: "layer3"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure keep alive LACP - enable port-channels
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.keepalive_portchannel_id }}"
+  #         enabled: true
+  #         mode: "layer3"
+  #   when: vpc.is_vpc_switch == true
   
-  - name: Configure keep alive LACP - add to VRF
-    cisco.nxos.nxos_vrf_interface:
-      vrf: "{{ keepalive_vrf }}"
-      interface: "port-channel {{ vpc.keepalive_portchannel_id }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure keep alive LACP - add to VRF
+  #   cisco.nxos.nxos_vrf_interface:
+  #     vrf: "{{ keepalive_vrf }}"
+  #     interface: "port-channel {{ vpc.keepalive_portchannel_id }}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure keep alive LACP - ip address
-    cisco.nxos.nxos_l3_interfaces:
-      config:
-        - name: "port-channel {{ vpc.keepalive_portchannel_id }}"
-          ipv4:
-            - address: "{{ keepalive_subnet | ansible.utils.ipaddr('net') | ansible.utils.ipaddr(src_ip_offset) }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure keep alive LACP - ip address
+  #   cisco.nxos.nxos_l3_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.keepalive_portchannel_id }}"
+  #         ipv4:
+  #           - address: "{{ keepalive_subnet | ansible.utils.ipaddr('net') | ansible.utils.ipaddr(src_ip_offset) }}"
+  #   when: vpc.is_vpc_switch == true
     
-  - name: Configure peer link LACP - enable members
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "ethernet {{ item.interface }}"
-          enabled: true
-    loop: "{{ vpc.peerlink_portchannel_members }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure peer link LACP - enable members
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "ethernet {{ item.interface }}"
+  #         enabled: true
+  #   loop: "{{ vpc.peerlink_portchannel_members }}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure peer link LACP - create LAGs
-    cisco.nxos.nxos_lag_interfaces:
-      config:
-        - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
-          members: "{{ ((['Ethernet'] | product(vpc.peerlink_portchannel_members | map(attribute='interface')) | map('join')) | map('community.general.dict_kv', 'member')) | map('combine', {'mode': 'active'}) }}"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure peer link LACP - create LAGs
+  #   cisco.nxos.nxos_lag_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
+  #         members: "{{ ((['Ethernet'] | product(vpc.peerlink_portchannel_members | map(attribute='interface')) | map('join')) | map('community.general.dict_kv', 'member')) | map('combine', {'mode': 'active'}) }}"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure peer link LACP - enable port-channels
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
-          enabled: true
-          mode: "layer2"
-    when: vpc.is_vpc_switch == true
+  # - name: Configure peer link LACP - enable port-channels
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
+  #         enabled: true
+  #         mode: "layer2"
+  #   when: vpc.is_vpc_switch == true
   
-  ### Trunk mode bug:
-    #   For some reason, the command "switchport mode trunk" doesn't get added to the configurations
-    #   when applied to an interface, but running "no switchport" followed by "switchport" solves the issue.
-    #   The following three tasks are applying the workaround to the bug.
-  - name: Configure peer link LACP - trunk mode bug fix (1)
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
-          mode: "layer3"
-    when: vpc.is_vpc_switch == true
+  # ### Trunk mode bug:
+  #   #   For some reason, the command "switchport mode trunk" doesn't get added to the configurations
+  #   #   when applied to an interface, but running "no switchport" followed by "switchport" solves the issue.
+  #   #   The following three tasks are applying the workaround to the bug.
+  # - name: Configure peer link LACP - trunk mode bug fix (1)
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
+  #         mode: "layer3"
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure peer link LACP - trunk mode bug fix (2)
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
-          mode: "layer2"
-          enabled: true
-    when: vpc.is_vpc_switch == true
+  # - name: Configure peer link LACP - trunk mode bug fix (2)
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
+  #         mode: "layer2"
+  #         enabled: true
+  #   when: vpc.is_vpc_switch == true
   
-  - name: Configure peer link LACP - trunk mode bug fix (3)
-    cisco.nxos.nxos_l2_interfaces:
-      config:
-        - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
-          mode: trunk
-    when: vpc.is_vpc_switch == true
+  # - name: Configure peer link LACP - trunk mode bug fix (3)
+  #   cisco.nxos.nxos_l2_interfaces:
+  #     config:
+  #       - name: "port-channel {{ vpc.peerlink_portchannel_id }}"
+  #         mode: trunk
+  #   when: vpc.is_vpc_switch == true
 
-  - name: Configure peer link LACP - enable VPC peer-link
-    cisco.nxos.nxos_vpc_interface:
-      portchannel: "{{ vpc.peerlink_portchannel_id }}"
-      peer_link: true
-    when: vpc.is_vpc_switch == true
+  # - name: Configure peer link LACP - enable VPC peer-link
+  #   cisco.nxos.nxos_vpc_interface:
+  #     portchannel: "{{ vpc.peerlink_portchannel_id }}"
+  #     peer_link: true
+  #   when: vpc.is_vpc_switch == true
