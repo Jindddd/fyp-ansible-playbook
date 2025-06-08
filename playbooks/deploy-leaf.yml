@@ -1,5 +1,5 @@
 - name:  Deploy new LEAF switch
-  hosts: "{{ devices }}"
+  hosts: leafs
   gather_facts: no
 
   tasks:

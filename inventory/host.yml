@@ -1,9 +1,4 @@
 all:
-  vars:
-    ansible_user: admin
-    ansible_password: admin
-    ansible_network_os: cisco.nxos.nxos
-
   children:
     leafs:
       hosts:
