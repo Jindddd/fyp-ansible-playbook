@@ -3,17 +3,17 @@ all:
     leafs:
       hosts:
         leaf1:
-          ansible_host: 172.20.20.4
+          ansible_host: 172.20.20.3
         leaf2:
-          ansible_host: 172.20.20.7
+          ansible_host: 172.20.20.4
       vars:
           role: leaf
 
     spines:
       hosts:
         spine1:
-          ansible_host: 172.20.20.6
-        spine1:
-          ansible_host: 172.20.20.3
+          ansible_host: 172.20.20.1
+        spine2:
+          ansible_host: 172.20.20.2
       vars:
-        role: leaf
+        role: spine
