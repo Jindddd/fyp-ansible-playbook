@@ -9,9 +9,17 @@ underlay_interfaces:
   - name: "1/2"
     address: "10.0.13.1/31"
 
-vxlan:
-  l2vnis:
-    - 10010
-  l3vnis:
-    - vni: 10099
-      vrf: "Tenant-A"
+vrfs:
+  - name: "Tenant-A"
+    l3_vni:
+      vlan_id: 99
+      vni: 10099
+    vlans:
+      - id: 10
+        vni: 10010
+        svi_address: "192.168.10.1/24"
+    
+access_interfaces:
+  - interface: "Ethernet1/10"
+    vlan_id: 10
+

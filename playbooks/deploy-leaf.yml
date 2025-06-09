@@ -109,8 +109,8 @@
         address_family:      
           - afi: ipv4
             safi: unicast
-            vrf: "{{ item.vrf }}"
-    loop: "{{ vxlan.l3vnis }}"
+            vrf: "{{ item.name }}"
+    loop: "{{ vrfs }}"
 
   - name: Configure BGP neighbors
     cisco.nxos.nxos_bgp_global:
@@ -155,26 +155,92 @@
   - name: Configure L3 VNIs
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: "nve1"
-      vni: "{{ item.vni }}"
+      vni: "{{ item }}"
       associate_vrf: true
-    loop: "{{ vxlan.l3vnis }}"
+    loop: "{{ vrfs.vrf_vlan.vni }}"
 
   - name: Set anycast MAC
     cisco.nxos.nxos_overlay_global:
       anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
 
-# Overlay
-
+  # Overlay Interfaces Configuration
   - name: Configure overlay interface
     cisco.nxos.nxos_interfaces:
       config:
-        - name: "Ethernet1/10"
+        - name: "{{ item.interface }}"
           enabled: true
           mode: layer2
+    loop: "{{ access_interfaces }}"
 
-  - name: Configure overlay interface - ip address
+  - name: Configure overlay interface - VLAN
     cisco.nxos.nxos_l2_interfaces:
       config:
-        - name: "Ethernet1/10"
+        - name: "{{ item.interface }}"
           access:
-            vlan: 10
+            vlan: "{{ item.vlan_id }}"
+    loop: "{{ access_interfaces }}"
+
+  # VLANs
+  - name: Configure L2VNI VLAN
+    cisco.nxos.nxos_vlans:
+      config:
+        - vlan_id: "{{ item.1.id }}"
+          enabled: true
+          mapped_vni: "{{ item.1.vni }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure L3VNI VLAN
+    cisco.nxos.nxos_vlans:
+      config:
+        - vlan_id: "{{ vrfs.l3_vni.vlan_id }}"
+          enabled: true
+          mapped_vni: "{{ vrfs.l3_vni.vni }}"
+  
+  - name: Configure SVI
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          ipv4:
+            - address: "{{ item.1.svi_address }}"
+          vrf: "{{ vrfs[vrfs.index(item.0)].name }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
+    
+  - name: Configure SVI (Anycast Gateway)
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          enabled: true
+          fabric_forwarding_anycast_gateway : true
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure L3VNI SVI
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan{{ l3_vni.vlan_id }}"
+          ip_forward : true
+    loop: "{{ vrfs }}"
+
+  - name: Configure tenant's VRF
+    cisco.nxos.nxos_vrf:
+      config:
+        - name: "{{ item.name }}"
+          rd: "auto"
+          vni: "{{ item.l3_vni.vni }}"
+    loop: "{{ vrfs }}"
+
+  - name: Configure VRFs address-family
+    cisco.nxos.nxos_vrf_af:
+      vrf: "{{ item.name }}"
+      afi: "ipv4"
+      route_target_both_auto_evpn: true
+      route_targets:
+        - rt: "auto"
+          direction: "both"
+    loop: "{{ vrfs }}"
+
+  - name: Configure EVPN
+    cisco.nxos.nxos_evpn_vni:
+      vni: "{{ item.1.vni }}"
+      route_distinguisher: "auto"
+      route_target_both: "auto"
+    loop: "{{ vrfs | subelements('vlans') }}"
