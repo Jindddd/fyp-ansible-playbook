@@ -2,3 +2,16 @@ hostname: "Leaf2"
 loopbacks:
   - id: 0
     address: "2.2.2.2/32"
+
+underlay_interfaces:
+  - name: "1/1"
+    address: "10.0.14.1/31"
+  - name: "1/2"
+    address: "10.0.15.1/31"
+
+vxlan:
+  l2vnis:
+    - 10010
+  l3vnis:
+    - vni: 10099
+      vrf: "Tenant-A"

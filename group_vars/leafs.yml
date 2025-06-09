@@ -5,3 +5,10 @@ features:
   - vn-segment-vlan-based
   - nv overlay
   - fabric forwarding
+
+spine_loopbacks:
+  - address: "3.3.3.3"
+  - address: "4.4.4.4"
+
+anycast_gateway_mac:
+  mac_address: "0000.aaaa.bbbb"

@@ -8,3 +8,10 @@ underlay_interfaces:
     address: "10.0.12.1/31"
   - name: "1/2"
     address: "10.0.13.1/31"
+
+vxlan:
+  l2vnis:
+    - 10010
+  l3vnis:
+    - vni: 10099
+      vrf: "Tenant-A"

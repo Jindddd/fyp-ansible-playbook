@@ -1,0 +1,4 @@
+hostname: "Spine1"
+loopbacks:
+  - id: 0
+    address: "3.3.3.3/32"

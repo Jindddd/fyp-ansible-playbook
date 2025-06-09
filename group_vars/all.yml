@@ -4,3 +4,6 @@ ansible_network_os: cisco.nxos.nxos
 ospf:
   name: "1"
   area: "0"
+
+bgp:
+  asn: "65000"
