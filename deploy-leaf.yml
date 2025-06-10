@@ -118,7 +118,7 @@
           - neighbor_address: "{{ item | ansible.utils.ipaddr('address')}}"
             remote_as: "{{ bgp.asn }}"
             update_source: "loopback {{ loopbacks[0].id }}"
-    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | ansible.utils.ipaddr('address') | list }}"
+    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
 
   - name: Configure BGP neighbor address families
     cisco.nxos.nxos_bgp_address_family:
