@@ -165,15 +165,15 @@
   - name: Configure overlay interface
     cisco.nxos.nxos_interfaces:
       config:
-        - name: "{{ item.interface }}"
+        - name: "{{ item.id }}"
           enabled: true
-          mode: layer2
+          mode: "layer2"
     loop: "{{ access_interfaces }}"
 
   - name: Configure overlay interface - VLAN
     cisco.nxos.nxos_l2_interfaces:
       config:
-        - name: "{{ item.interface }}"
+        - name: "{{ item.id }}"
           access:
             vlan: "{{ item.vlan_id }}"
     loop: "{{ access_interfaces }}"
