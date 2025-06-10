@@ -190,10 +190,11 @@
   - name: Configure L3VNI VLAN
     cisco.nxos.nxos_vlans:
       config:
-        - vlan_id: "{{ vrfs.l3_vni.vlan_id }}"
+        - vlan_id: "{{ item.l3_vni.vlan_id }}"
           enabled: true
-          mapped_vni: "{{ vrfs.l3_vni.vni }}"
-  
+          mapped_vni: "{{ item.l3_vni.vni }}"
+    loop: "{{ vrfs }}"
+
   - name: Configure SVI
     cisco.nxos.nxos_l3_interfaces:
       config:
