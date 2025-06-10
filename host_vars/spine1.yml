@@ -2,3 +2,11 @@ hostname: "Spine1"
 loopbacks:
   - id: 0
     address: "3.3.3.3/32"
+
+underlay_interfaces:
+  - id: "1/1"
+    address: "10.0.13.0/31"
+  - id: "1/2"
+    address: "10.0.15.0/31"
+  - id: "1/49"
+    address: "10.0.1.2/24"
