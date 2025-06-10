@@ -4,10 +4,6 @@
 
 
   tasks:
-  - name: Debug features
-    debug:
-      var: features
-
   - name: Enable features
     cisco.nxos.nxos_feature:
         feature: "{{ item }}"
@@ -102,8 +98,6 @@
         address_family:
           - afi: ipv4
             safi: unicast
-            send_community:
-              both: true
           - afi: l2vpn
             safi: evpn
 
