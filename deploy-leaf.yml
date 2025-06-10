@@ -121,7 +121,7 @@
     loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
 
   - name: Configure BGP neighbor address families
-    cisco.nxos.nxos_bgp_address_family:
+    cisco.nxos.nxos_bgp_neighbor_address_family:
       config:
         as_number: "{{ bgp.asn }}"
         neighbors:
