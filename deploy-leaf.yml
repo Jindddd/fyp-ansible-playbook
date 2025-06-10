@@ -2,7 +2,6 @@
   hosts: leafs
   gather_facts: false
 
-
   tasks:
   - name: Enable features
     cisco.nxos.nxos_feature:
@@ -116,7 +115,7 @@
       config:
         as_number: "{{ bgp.asn }}"
         neighbors:
-          - neighbor_address: "{{ item }}"
+          - neighbor_address: "{{ item | ansible.utils.ipaddr('address')}}"
             remote_as: "{{ bgp.asn }}"
             update_source: "loopback {{ loopbacks[0].id }}"
     loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | ansible.utils.ipaddr('address') | list }}"
@@ -126,7 +125,7 @@
       config:
         as_number: "{{ bgp.asn }}"
         neighbors:
-          - neighbor_address: "{{ item }}"
+          - neighbor_address: "{{ item | ansible.utils.ipaddr('address') }}"
             address_family:
               - afi: ipv4
                 safi: unicast
@@ -134,7 +133,7 @@
                 safi: evpn
                 send_community:
                   both: true
-    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | ansible.utils.ipaddr('address') | list }}"
+    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
 
   - name: Create VTEP with BGP learning
     cisco.nxos.nxos_vxlan_vtep:
