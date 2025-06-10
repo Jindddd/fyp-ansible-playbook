@@ -2,7 +2,12 @@
   hosts: leafs
   gather_facts: no
 
+
   tasks:
+  - name: Debug features
+    debug:
+      var: features
+
   - name: Enable features
     cisco.nxos.nxos_feature:
         feature: "{{ item }}"
