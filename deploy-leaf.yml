@@ -135,6 +135,24 @@
                   both: true
     loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
 
+  - name: Configure tenant's VRF
+    cisco.nxos.nxos_vrf:
+      config:
+        - name: "{{ item.name }}"
+          rd: "auto"
+          vni: "{{ item.l3_vni.vni }}"
+    loop: "{{ vrfs }}"
+
+  - name: Configure VRFs address-family
+    cisco.nxos.nxos_vrf_af:
+      vrf: "{{ item.name }}"
+      afi: "ipv4"
+      route_target_both_auto_evpn: true
+      route_targets:
+        - rt: "auto"
+          direction: "both"
+    loop: "{{ vrfs }}"
+
   - name: Create VTEP with BGP learning
     cisco.nxos.nxos_vxlan_vtep:
       interface: "nve1"
@@ -203,12 +221,17 @@
             - address: "{{ item.1.svi_address }}"
     loop: "{{ vrfs | subelements('vlans') }}"
   
-  - name: Configure SVI (VRF)
-    cisco.nxos.nxos_vrf_interfaces:
-      config:
-        - name: "vlan{{ item.1.id }}"
-          vrf_name: "{{ item.0.name }}"
+  - name: Add L2VNI to tenant VRF
+    cisco.nxos.nxos_vrf_interface:
+      interface: "vlan{{ item.1.id }}"
+      vrf: "{{ item.0.name }}"
     loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Add L3VNI to tenant VRF
+    cisco.nxos.nxos_vrf_interface:
+      interface: "vlan{{ item.l3_vni.vlan_id }}"
+      vrf: "{{ item.name }}"
+    loop: "{{ vrfs }}"
 
   - name: Configure SVI (Anycast Gateway)
     cisco.nxos.nxos_interfaces:
@@ -223,24 +246,6 @@
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
           ip_forward : true
-    loop: "{{ vrfs }}"
-
-  - name: Configure tenant's VRF
-    cisco.nxos.nxos_vrf:
-      config:
-        - name: "{{ item.name }}"
-          rd: "auto"
-          vni: "{{ item.l3_vni.vni }}"
-    loop: "{{ vrfs }}"
-
-  - name: Configure VRFs address-family
-    cisco.nxos.nxos_vrf_af:
-      vrf: "{{ item.name }}"
-      afi: "ipv4"
-      route_target_both_auto_evpn: true
-      route_targets:
-        - rt: "auto"
-          direction: "both"
     loop: "{{ vrfs }}"
 
   - name: Configure EVPN
