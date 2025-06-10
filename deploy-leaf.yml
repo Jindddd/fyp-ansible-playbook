@@ -21,6 +21,14 @@
       config:
         hostname: "{{ hostname }}"
 
+  # To decrease the vpc-convergence & increase the arp-ether
+  # TCAM regions in order to allow ARP Suppression.
+  - name: Configure TCAM regions
+    cisco.nxos.nxos_config:
+    lines:
+      - hardware access-list tcam region vpc-convergence 0
+      - hardware access-list tcam region arp-ether 256
+
   - name: Configure loopback interfaces
     cisco.nxos.nxos_interfaces:
       config:
