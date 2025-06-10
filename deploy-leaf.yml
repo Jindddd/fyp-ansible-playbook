@@ -1,6 +1,6 @@
 - name:  Deploy new leaf switch
   hosts: leafs
-  gather_facts: no
+  gather_facts: false
 
 
   tasks:
