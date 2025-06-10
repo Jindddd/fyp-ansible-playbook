@@ -203,7 +203,7 @@
             - address: "{{ item.1.svi_address }}"
     loop: "{{ vrfs | subelements('vlans') }}"
   
-  - name: Configure SVI VRF
+  - name: Configure SVI (VRF)
     cisco.nxos.nxos_vrf_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
@@ -221,7 +221,7 @@
   - name: Configure L3VNI SVI
     cisco.nxos.nxos_l3_interfaces:
       config:
-        - name: "vlan{{ l3_vni.vlan_id }}"
+        - name: "vlan{{ item.l3_vni.vlan_id }}"
           ip_forward : true
     loop: "{{ vrfs }}"
 
