@@ -203,14 +203,6 @@
           mapped_vni: "{{ item.l3_vni.vni }}"
     loop: "{{ vrfs }}"
 
-  - name: Configure L2VNI SVI
-    cisco.nxos.nxos_l3_interfaces:
-      config:
-        - name: "vlan{{ item.1.id }}"
-          ipv4:
-            - address: "{{ item.1.svi_address }}"
-    loop: "{{ vrfs | subelements('vlans') }}"
-  
   - name: Add L2VNI to tenant VRF
     cisco.nxos.nxos_vrf_interface:
       interface: "vlan{{ item.1.id }}"
@@ -231,12 +223,20 @@
       vrf: "{{ item.name }}"
     loop: "{{ vrfs }}"
 
-  - name: Configure SVI (Anycast Gateway)
+  - name: Configure L2VNI SVI (Anycast Gateway)
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
           enabled: true
           fabric_forwarding_anycast_gateway : true
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure L2VNI SVI
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          ipv4:
+            - address: "{{ item.1.svi_address }}"
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Configure EVPN
