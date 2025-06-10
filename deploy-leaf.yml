@@ -38,7 +38,7 @@
       config:
         - name: "loopback {{ item.id }}"
           ipv4:
-            - address: "{{ item.address }}/32"
+            - address: "{{ item.address }}"
     loop: "{{ loopbacks }}"
 
   - name: Configure underlay interfaces
