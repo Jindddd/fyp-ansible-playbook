@@ -186,8 +186,7 @@
     cisco.nxos.nxos_overlay_global:
       anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
 
-  # VLANs
-  - name: Configure L2VNI VLAN
+  - name: Configure L2VNI VLANs
     cisco.nxos.nxos_vlans:
       config:
         - vlan_id: "{{ item.1.id }}"
@@ -195,7 +194,7 @@
           mapped_vni: "{{ item.1.vni }}"
     loop: "{{ vrfs | subelements('vlans') }}"
 
-  - name: Configure L3VNI VLAN
+  - name: Configure L3VNI VLANs
     cisco.nxos.nxos_vlans:
       config:
         - vlan_id: "{{ item.l3_vni.vlan_id }}"
@@ -203,7 +202,7 @@
           mapped_vni: "{{ item.l3_vni.vni }}"
     loop: "{{ vrfs }}"
 
-  - name: Create L2VNI SVI
+  - name: Create L2VNIs SVI
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
@@ -211,33 +210,12 @@
           fabric_forwarding_anycast_gateway : true
     loop: "{{ vrfs | subelements('vlans') }}"
  
-  # SVI must be created before assigning it to a VRF.
-  - name: Add L2VNI to tenant VRF
-    cisco.nxos.nxos_vrf_interface:
-      interface: "vlan{{ item.1.id }}"
-      vrf: "{{ item.0.name }}"
-    loop: "{{ vrfs | subelements('vlans') }}"
-
-  - name: Configure L2VNI SVI
-    cisco.nxos.nxos_l3_interfaces:
-      config:
-        - name: "vlan{{ item.1.id }}"
-          ipv4:
-            - address: "{{ item.1.svi_address }}"
-    loop: "{{ vrfs | subelements('vlans') }}"
-
   - name: Configure L3VNI SVI
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
           enabled: true
           ip_forward : true
-    loop: "{{ vrfs }}"
-
-  - name: Add L3VNI to tenant VRF
-    cisco.nxos.nxos_vrf_interface:
-      interface: "vlan{{ item.l3_vni.vlan_id }}"
-      vrf: "{{ item.name }}"
     loop: "{{ vrfs }}"
 
   - name: Configure EVPN
@@ -247,8 +225,28 @@
       route_target_both: "auto"
     loop: "{{ vrfs | subelements('vlans') }}"
 
-  # Overlay Interfaces Configuration
-  - name: Configure overlay interface
+  - name: Add L3VNI to tenant VRF
+    cisco.nxos.nxos_vrf_interface:
+      interface: "vlan{{ item.l3_vni.vlan_id }}"
+      vrf: "{{ item.name }}"
+    loop: "{{ vrfs }}"
+
+  # SVI must be created before assigning it to a VRF.
+  - name: Add L2VNI to tenant VRF
+    cisco.nxos.nxos_vrf_interface:
+      interface: "vlan{{ item.1.id }}"
+      vrf: "{{ item.0.name }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure L2VNI SVI - IP address
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          ipv4:
+            - address: "{{ item.1.svi_address }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure access
     cisco.nxos.nxos_interfaces:
       config:
         - name: "Ethernet{{ item.id }}"
@@ -256,7 +254,7 @@
           mode: "layer2"
     loop: "{{ access_interfaces }}"
 
-  - name: Configure overlay interface - VLAN
+  - name: Configure access ports - VLAN
     cisco.nxos.nxos_l2_interfaces:
       config:
         - name: "Ethernet{{ item.id }}"
