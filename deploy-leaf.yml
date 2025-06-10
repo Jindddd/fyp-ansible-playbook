@@ -44,7 +44,7 @@
   - name: Configure underlay interfaces
     cisco.nxos.nxos_interfaces:
       config:
-        - name: "Ethernet{{ item.id }}"
+        - name: "Ethernet{{ item.name }}"
           mtu: 9216
           enabled: true
           mode: layer3
@@ -53,7 +53,7 @@
   - name: Configure underlay interfaces - ip address
     cisco.nxos.nxos_l3_interfaces:
       config:
-        - name: "Ethernet{{ item.id }}"
+        - name: "Ethernet{{ item.name }}"
           ipv4:
             - address: "{{ item.address }}"
     loop: "{{ underlay_interfaces }}"
