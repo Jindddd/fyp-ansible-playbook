@@ -137,10 +137,9 @@
 
   - name: Configure tenant's VRF
     cisco.nxos.nxos_vrf:
-      config:
-        - name: "{{ item.name }}"
-          rd: "auto"
-          vni: "{{ item.l3_vni.vni }}"
+      name: "{{ item.name }}"
+      rd: "auto"
+      vni: "{{ item.l3_vni.vni }}"
     loop: "{{ vrfs }}"
 
   - name: Configure VRFs address-family
