@@ -3,17 +3,25 @@ all:
     leafs:
       hosts:
         leaf1:
-          ansible_host: leaf1
+          ansible_host: localhost
+          ansible_port: 2224
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=+ssh-rsa'
         leaf2:
-          ansible_host: leaf2
+          ansible_host: localhost
+          ansible_port: 2225
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=+ssh-rsa'
       vars:
           role: leaf
 
     spines:
       hosts:
         spine1:
-          ansible_host: spine1
+          ansible_host: localhost
+          ansible_port: 2222
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=+ssh-rsa'
         spine2:
-          ansible_host: spine2
+          ansible_host: localhost
+          ansible_port: 2223
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=+ssh-rsa'
       vars:
         role: spine
