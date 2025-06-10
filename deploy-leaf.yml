@@ -119,7 +119,7 @@
           - neighbor_address: "{{ item }}"
             remote_as: "{{ bgp.asn }}"
             update_source: "loopback {{ loopbacks[0].id }}"
-    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
+    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | ansible.utils.ipaddr('address') | list }}"
 
   - name: Configure BGP neighbor address families
     cisco.nxos.nxos_bgp_address_family:
@@ -134,7 +134,7 @@
                 safi: evpn
                 send_community:
                   both: true
-    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
+    loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | ansible.utils.ipaddr('address') | list }}"
 
   - name: Create VTEP with BGP learning
     cisco.nxos.nxos_vxlan_vtep:
