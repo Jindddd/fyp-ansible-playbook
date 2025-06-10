@@ -145,17 +145,17 @@
   - name: Create L2 VNIs
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: "nve1"
-      vni: "{{ item }}"
+      vni: "{{ item.1.vni }}"
       suppress_arp: true
       ingress_replication: "bgp"
-    loop: "{{ vxlan.l2vnis }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Configure L3 VNIs
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: "nve1"
       vni: "{{ item }}"
       associate_vrf: true
-    loop: "{{ vrfs.vrf_vlan.vni }}"
+    loop: "{{ vrfs.l3vni.vni }}"
 
   - name: Set anycast MAC
     cisco.nxos.nxos_overlay_global:
