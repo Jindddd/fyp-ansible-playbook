@@ -123,16 +123,16 @@
   - name: Configure BGP neighbor address families
     cisco.nxos.nxos_bgp_neighbor_address_family:
       config:
-        neighbors:
-          - as_number: "{{ bgp.asn }}"
-            neighbor_address: "{{ item | ansible.utils.ipaddr('address') }}"
-            address_family:
-              - afi: ipv4
-                safi: unicast
-              - afi: l2vpn
-                safi: evpn
-                send_community:
-                  both: true
+        as_number: "{{ bgp.asn }}"
+        neighbors:         
+          neighbor_address: "{{ item | ansible.utils.ipaddr('address') }}"
+          address_family:
+            - afi: ipv4
+              safi: unicast
+            - afi: l2vpn
+              safi: evpn
+              send_community:
+                both: true
     loop: "{{ groups['spines'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
 
   - name: Create VTEP with BGP learning
