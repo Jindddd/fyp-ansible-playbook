@@ -153,9 +153,9 @@
   - name: Configure L3 VNIs
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: "nve1"
-      vni: "{{ item }}"
+      vni: "{{ item.l3_vni.vni }}"
       associate_vrf: true
-    loop: "{{ vrfs.l3vni.vni }}"
+    loop: "{{ vrfs }}"
 
   - name: Set anycast MAC
     cisco.nxos.nxos_overlay_global:
