@@ -201,7 +201,7 @@
         - name: "vlan{{ item.1.id }}"
           ipv4:
             - address: "{{ item.1.svi_address }}"
-          vrf: "{{ vrfs[vrfs.index(item.0)].name }}"
+          vrf: "{{ item.0.name }}"
     loop: "{{ vrfs | subelements('vlans') }}"
     
   - name: Configure SVI (Anycast Gateway)
