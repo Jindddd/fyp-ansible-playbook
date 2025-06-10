@@ -4,10 +4,10 @@ all:
       hosts:
         leaf1:
           ansible_host: 0.0.0.0
-          ansible_port: 2224
+          ansible_port: 3224
         leaf2:
           ansible_host: 0.0.0.0
-          ansible_port: 2225
+          ansible_port: 3225
       vars:
           role: leaf
 
@@ -15,9 +15,9 @@ all:
       hosts:
         spine1:
           ansible_host: 0.0.0.0
-          ansible_port: 2222
+          ansible_port: 3222
         spine2:
           ansible_host: 0.0.0.0
-          ansible_port: 2223
+          ansible_port: 3223
       vars:
         role: spine
