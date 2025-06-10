@@ -186,8 +186,6 @@
     cisco.nxos.nxos_overlay_global:
       anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
 
-
-
   # VLANs
   - name: Configure L2VNI VLAN
     cisco.nxos.nxos_vlans:
@@ -205,7 +203,7 @@
           mapped_vni: "{{ item.l3_vni.vni }}"
     loop: "{{ vrfs }}"
 
-  - name: Configure SVI
+  - name: Configure L2VNI SVI
     cisco.nxos.nxos_l3_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
