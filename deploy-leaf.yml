@@ -207,7 +207,7 @@
     cisco.nxos.nxos_vrf_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
-          vrf: "{{ item.0.name }}"
+          vrf_name: "{{ item.0.name }}"
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Configure SVI (Anycast Gateway)
