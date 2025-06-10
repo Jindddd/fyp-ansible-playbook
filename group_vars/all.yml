@@ -5,7 +5,7 @@ ansible_connection: ansible.netcommon.network_cli
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=+ssh-rsa'
 
 ospf:
-  name: "1"
+  id: "1"
   area: "0"
 
 bgp:

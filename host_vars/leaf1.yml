@@ -4,9 +4,9 @@ loopbacks:
     address: "1.1.1.1/32"
 
 underlay_interfaces:
-  - name: "1/1"
+  - id: "1/1"
     address: "10.0.12.1/31"
-  - name: "1/2"
+  - id: "1/2"
     address: "10.0.13.1/31"
 
 vrfs:
@@ -20,6 +20,6 @@ vrfs:
         svi_address: "192.168.10.1/24"
     
 access_interfaces:
-  - interface: "Ethernet1/10"
+  - id: "1/10"
     vlan_id: 10
 
