@@ -178,22 +178,7 @@
     cisco.nxos.nxos_overlay_global:
       anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
 
-  # Overlay Interfaces Configuration
-  - name: Configure overlay interface
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "Ethernet{{ item.id }}"
-          enabled: true
-          mode: "layer2"
-    loop: "{{ access_interfaces }}"
 
-  - name: Configure overlay interface - VLAN
-    cisco.nxos.nxos_l2_interfaces:
-      config:
-        - name: "Ethernet{{ item.id }}"
-          access:
-            vlan: "{{ item.vlan_id }}"
-    loop: "{{ access_interfaces }}"
 
   # VLANs
   - name: Configure L2VNI VLAN
@@ -230,6 +215,7 @@
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
+          enabled: true
           ip_forward : true
     loop: "{{ vrfs }}"
 
@@ -253,3 +239,20 @@
       route_distinguisher: "auto"
       route_target_both: "auto"
     loop: "{{ vrfs | subelements('vlans') }}"
+
+  # Overlay Interfaces Configuration
+  - name: Configure overlay interface
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "Ethernet{{ item.id }}"
+          enabled: true
+          mode: "layer2"
+    loop: "{{ access_interfaces }}"
+
+  - name: Configure overlay interface - VLAN
+    cisco.nxos.nxos_l2_interfaces:
+      config:
+        - name: "Ethernet{{ item.id }}"
+          access:
+            vlan: "{{ item.vlan_id }}"
+    loop: "{{ access_interfaces }}"
