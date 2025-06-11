@@ -201,18 +201,16 @@
   - name: Enable Anycast-Gateway on all L2 SVIs
     cisco.nxos.nxos_config:
       lines:
-        - configure terminal
-        - interface Vlan{{ item.1.id }}
         - fabric forwarding mode anycast-gateway
+      parents: interface Vlan{{ item.1.id }}
     loop: "{{ vrfs | subelements('vlans') }}"
 
 # Using manual way to enable ip forward on L3 VNI SVIs
   - name: Explicitly enable IP-forward on L3 VNI SVIs
     cisco.nxos.nxos_config:
       lines:
-        - configure terminal
-        - interface Vlan{{ item.l3_vni.vlan_id }}
         - ip forward
+      parents: interface Vlan{{ item.l3_vni.vlan_id }}
     loop: "{{ vrfs }}"
 
   - name: Create VTEP
