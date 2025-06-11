@@ -189,14 +189,6 @@
           ip_forward: true
     loop: "{{ vrfs }}"
 
-  - name: Configure L2VNI SVI - IP address
-    cisco.nxos.nxos_l3_interfaces:
-      config:
-        - name: "vlan{{ item.1.id }}"
-          ipv4:
-            - address: "{{ item.1.svi_address }}"
-    loop: "{{ vrfs | subelements('vlans') }}"
-    
   - name: Create L2VNIs SVI
     cisco.nxos.nxos_interfaces:
       config:
@@ -204,22 +196,6 @@
           description: "{{ item.0.name }} L2VNI SVI"
           enabled: true
     loop: "{{ vrfs | subelements('vlans') }}"
-
-# Using manual way to enable fabric forwarding anycast-gateway
-  - name: Enable Anycast-Gateway on all L2 SVIs
-    cisco.nxos.nxos_config:
-      lines:
-        - fabric forwarding mode anycast-gateway
-      parents: interface Vlan{{ item.1.id }}
-    loop: "{{ vrfs | subelements('vlans') }}"
-
-# Using manual way to enable ip forward on L3 VNI SVIs
-  - name: Explicitly enable IP-forward on L3 VNI SVIs
-    cisco.nxos.nxos_config:
-      lines:
-        - ip forward
-      parents: interface Vlan{{ item.l3_vni.vlan_id }}
-    loop: "{{ vrfs }}"
 
   - name: Create VTEP
     cisco.nxos.nxos_interfaces:
@@ -269,6 +245,14 @@
       vrf: "{{ item.0.name }}"
     loop: "{{ vrfs | subelements('vlans') }}"
 
+  - name: Configure L2VNI SVI - IP address
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          ipv4:
+            - address: "{{ item.1.svi_address }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
+
   - name: Configure access
     cisco.nxos.nxos_interfaces:
       config:
@@ -285,4 +269,18 @@
             vlan: "{{ item.vlan_id }}"
     loop: "{{ access_interfaces }}"
   
+# Using manual way to enable fabric forwarding anycast-gateway
+  - name: Enable Anycast-Gateway on all L2 SVIs
+    cisco.nxos.nxos_config:
+      lines:
+        - fabric forwarding mode anycast-gateway
+      parents: interface Vlan{{ item.1.id }}
+    loop: "{{ vrfs | subelements('vlans') }}"
 
+# Using manual way to enable ip forward on L3 VNI SVIs
+  - name: Explicitly enable IP-forward on L3 VNI SVIs
+    cisco.nxos.nxos_config:
+      lines:
+        - ip forward
+      parents: interface Vlan{{ item.l3_vni.vlan_id }}
+    loop: "{{ vrfs }}"
