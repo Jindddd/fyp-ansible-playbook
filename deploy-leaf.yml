@@ -189,14 +189,6 @@
           ip_forward: true
     loop: "{{ vrfs }}"
 
-  - name: Configure L2VNI SVI - IP address
-    cisco.nxos.nxos_l3_interfaces:
-      config:
-        - name: "vlan{{ item.1.id }}"
-          ipv4:
-            - address: "{{ item.1.svi_address }}"
-    loop: "{{ vrfs | subelements('vlans') }}"
-    
   - name: Create L2VNIs SVI
     cisco.nxos.nxos_interfaces:
       config:
@@ -267,6 +259,14 @@
     cisco.nxos.nxos_vrf_interface:
       interface: "vlan{{ item.1.id }}"
       vrf: "{{ item.0.name }}"
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure L2VNI SVI - IP address
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          ipv4:
+            - address: "{{ item.1.svi_address }}"
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Configure access
