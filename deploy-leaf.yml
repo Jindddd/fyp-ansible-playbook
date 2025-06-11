@@ -192,7 +192,7 @@
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
-          ip_forward: true
+          ip_forward: "true"
     loop: "{{ vrfs }}"
 
   - name: Create L2VNIs SVI
