@@ -184,7 +184,8 @@
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
-          ip_forward : true
+          ip_forward: true
+          enabled: true
     loop: "{{ vrfs }}"
 
   - name: Create L2VNIs SVI
@@ -192,6 +193,7 @@
       config:
         - name: "vlan{{ item.1.id }}"
           fabric_forwarding_anycast_gateway: true
+          enabled: true
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Create VTEP
