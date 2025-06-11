@@ -196,6 +196,13 @@
           fabric_forwarding_anycast_gateway : true
     loop: "{{ vrfs | subelements('vlans') }}"
 
+  - name: Create VTEP with BGP learning
+    cisco.nxos.nxos_vxlan_vtep:
+      interface: "nve1"
+      host_reachability: true
+      source_interface: "loopback {{ loopbacks[0].id }}"
+      shutdown: false
+
   - name: Add L3VNIs to VTEP
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: "nve1"
@@ -255,10 +262,4 @@
             vlan: "{{ item.vlan_id }}"
     loop: "{{ access_interfaces }}"
   
-  - name: Create VTEP with BGP learning
-    cisco.nxos.nxos_vxlan_vtep:
-      interface: "nve1"
-      host_reachability: true
-      source_interface: "loopback {{ loopbacks[0].id }}"
-      shutdown: false
 
