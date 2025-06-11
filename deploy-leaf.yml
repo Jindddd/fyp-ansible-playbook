@@ -184,29 +184,18 @@
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
-          ip_forward: true
+          description: "{{ item.name }} L3VNI SVI"
           enabled: true
-    loop: "{{ vrfs }}"
-
-  - name: Configure L3VNI SVI IP Forward
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "vlan{{ item.l3_vni.vlan_id }}"
-          ip_forward: "true"
+          ip_forward: true
     loop: "{{ vrfs }}"
 
   - name: Create L2VNIs SVI
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
-          enabled: true
-    loop: "{{ vrfs | subelements('vlans') }}"
-
-  - name: Configure L2VNIs SVI fabric forwarding
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "vlan{{ item.1.id }}"
+          description: "{{ item.0.name }} L2VNI SVI"
           fabric_forwarding_anycast_gateway: true
+          enabled: true
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Create VTEP
