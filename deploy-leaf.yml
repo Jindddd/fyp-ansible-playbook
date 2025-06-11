@@ -283,7 +283,8 @@
         - name: "vlan{{ item.1.id }}"
           fabric_forwarding_anycast_gateway: true
           enabled: true
-    loop: "{{ vrfs | subelements('vlans') }}"  
+    loop: "{{ vrfs | subelements('vlans') }}" 
+    
 # # Using manual way to enable fabric forwarding anycast-gateway
 #   - name: Enable Anycast-Gateway on all L2 SVIs
 #     cisco.nxos.nxos_config:
