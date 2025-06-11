@@ -194,7 +194,6 @@
       config:
         - name: "vlan{{ item.1.id }}"
           description: "{{ item.0.name }} L2VNI SVI"
-          fabric_forwarding_anycast_gateway: true
           enabled: true
     loop: "{{ vrfs | subelements('vlans') }}"
 
