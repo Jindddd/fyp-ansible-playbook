@@ -180,7 +180,7 @@
           direction: "both"
     loop: "{{ vrfs }}"
 
-  - name: Configure L3VNI SVI
+  - name: Create L3VNI SVI
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
@@ -188,12 +188,25 @@
           enabled: true
     loop: "{{ vrfs }}"
 
+  - name: Configure L3VNI SVI IP Forward
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "vlan{{ item.l3_vni.vlan_id }}"
+          ip_forward: true
+    loop: "{{ vrfs }}"
+
   - name: Create L2VNIs SVI
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
-          fabric_forwarding_anycast_gateway: true
           enabled: true
+    loop: "{{ vrfs | subelements('vlans') }}"
+
+  - name: Configure L2VNIs SVI fabric forwarding
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "vlan{{ item.1.id }}"
+          fabric_forwarding_anycast_gateway: true
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Create VTEP
