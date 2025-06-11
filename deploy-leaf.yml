@@ -193,7 +193,7 @@
       config:
         - name: "vlan{{ item.1.id }}"
           enabled: true
-          fabric_forwarding_anycast_gateway : true
+          fabric_forwarding_anycast_gateway: true
     loop: "{{ vrfs | subelements('vlans') }}"
 
   - name: Create VTEP with BGP learning
