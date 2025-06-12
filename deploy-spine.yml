@@ -61,13 +61,13 @@
   - name: Enable OSPF over loopback interfaces
     cisco.nxos.nxos_ospf_interfaces:
         config:
-        - name: "loopback {{ item.id }}"
-          address_family:
-            - afi: ipv4
-              processes:
-                - process_id: "{{ ospf.id }}"
-                  area:
-                    area_id: "{{ ospf.area }}"
+          - name: "loopback {{ item.id }}"
+            address_family:
+              - afi: ipv4
+                processes:
+                  - process_id: "{{ ospf.id }}"
+                    area:
+                      area_id: "{{ ospf.area }}"
     loop: "{{ loopbacks }}"
 
   - name: Enable OSPF over underlay interfaces
