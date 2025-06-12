@@ -142,5 +142,5 @@
             routes:
               - dest: "0.0.0.0/0"
                 next_hops:
-                  forward_router_address: "{{ default_gateway }}"
+                  - forward_router_address: "{{ default_gateway }}"
 
