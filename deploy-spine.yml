@@ -73,13 +73,13 @@
   - name: Enable OSPF over underlay interfaces
     cisco.nxos.nxos_ospf_interfaces:
         config:
-        - name: "Ethernet{{ item.id }}"
-          address_family:
-            - afi: ipv4
-              processes:
-                - process_id: "{{ ospf.name }}"
-                  area:
-                    area_id: "{{ ospf.area }}"
+          - name: "Ethernet{{ item.id }}"
+            address_family:
+              - afi: ipv4
+                processes:
+                  - process_id: "{{ ospf.name }}"
+                    area:
+                      area_id: "{{ ospf.area }}"
     loop: "{{ underlay_interfaces }}"
 
   - name: Enable BGP
