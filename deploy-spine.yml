@@ -13,6 +13,10 @@
       config:
         hostname: "{{ hostname }}"
 
+  - name: Enable overlay EVPN
+    cisco.nxos.nxos_evpn_global:
+      nv_overlay_evpn: true
+
   - name: Chagen the system mtu to 9216
     cisco.nxos.nxos_system:
       system_mtu: 9216
