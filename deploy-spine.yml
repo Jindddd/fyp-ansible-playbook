@@ -77,7 +77,7 @@
             address_family:
               - afi: ipv4
                 processes:
-                  - process_id: "{{ ospf.name }}"
+                  - process_id: "{{ ospf.id }}"
                     area:
                       area_id: "{{ ospf.area }}"
     loop: "{{ underlay_interfaces }}"
