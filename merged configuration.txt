@@ -1,0 +1,320 @@
+# Leaf1
+hostname Leaf1
+
+feature ospf
+feature bgp
+feature interface-vlan
+feature vn-segment-vlan-based
+feature nv overlay
+feature fabric forwarding
+nv overlay evpn
+system jumbomtu 9216
+
+fabric forwarding anycast-gateway-mac 0000.aaaa.bbbb
+
+vlan 10
+  vn-segment 10010
+  
+vlan 99
+  vn-segment 10099
+ 
+vrf context Tenant-A
+  vni 10099
+  rd auto
+  address-family ipv4 unicast
+	route-target both auto
+	route-target both auto evpn
+
+hardware access-list tcam region vpc-convergence 0
+hardware access-list tcam region arp-ether 256
+
+interface vlan10
+  no shutdown
+  vrf member Tenant-A
+  ip address 192.168.10.1/24
+
+interface vlan99
+  no shutdown
+  vrf member Tenant-A
+  ip forward
+  
+interface nve1
+  no shutdown
+  source-interface loopback0
+  host-reachability protocol bgp
+  member vni 10010
+	suppress-arp
+    ingress-replication protocol bgp
+  member vni 10099 associate-vrf
+
+interface Ethernet1/1
+  no switchport
+  ip address 10.0.12.1/31
+  ip router ospf 1 area 0
+  no shutdown
+
+interface Ethernet1/2
+  no switchport
+  ip address 10.0.13.1/31
+  ip router ospf 1 area 0
+  no shutdown
+
+interface Ethernet1/10
+  switchport
+  switchport mode access
+  switchport access vlan 10
+  no shutdown
+  
+interface loopback0
+  ip address 1.1.1.1/32
+  ip router ospf 1 area 0
+  no shutdown
+  
+router ospf 1
+  router-id 1.1.1.1
+
+router bgp 65000
+  router-id 1.1.1.1
+  address-family ipv4 unicast
+  address-family l2vpn evpn
+  neighbor 3.3.3.3
+	remote-as 65000
+	update-source loopback0
+	address-family ipv4 unicast
+	address-family l2vpn evpn
+		send-community both
+  neighbor 4.4.4.4
+	remote-as 65000
+	update-source loopback0
+	address-family ipv4 unicast
+	address-family l2vpn evpn
+		send-community both
+  vrf Tenant-A
+    address-family ipv4 unicast
+
+evpn
+  vni 10010 l2
+  rd auto
+  route-target both auto
+  
+# Leaf 2
+hostname Leaf2
+
+feature ospf
+feature bgp
+feature interface-vlan
+feature vn-segment-vlan-based
+feature nv overlay
+feature fabric forwarding
+nv overlay evpn
+system jumbomtu 9216
+
+fabric forwarding anycast-gateway-mac 0000.aaaa.bbbb
+
+hardware access-list tcam region vpc-convergence 0
+hardware access-list tcam region arp-ether 256
+
+interface loopback0
+  ip address 2.2.2.2/32
+  ip router ospf 1 area 0
+  no shutdown
+
+interface nve1
+  no shutdown
+  source-interface loopback0
+  host-reachability protocol bgp
+  member vni 10010
+	suppress-arp
+    ingress-replication protocol bgp
+  member vni 10099 associate-vrf
+  
+interface Ethernet1/1
+  no switchport
+  ip address 10.0.14.1/31
+  ip router ospf 1 area 0
+  no shutdown
+
+interface Ethernet1/2
+  no switchport
+  ip address 10.0.15.1/31
+  ip router ospf 1 area 0
+  no shutdown
+
+interface Ethernet1/10
+  switchport
+  switchport mode access
+  switchport access vlan 10
+  no shutdown
+
+interface vlan10
+  no shutdown
+  vrf member Tenant-A
+  ip address 192.168.10.2/24
+  fabric forwarding mode anycast-gateway
+
+interface vlan99
+  no shutdown
+  vrf member Tenant-A
+  ip forward
+
+vrf context Tenant-A
+  vni 10099
+  rd auto
+  address-family ipv4 unicast
+	route-target both auto
+	route-target both auto evpn
+
+vlan 99
+  vn-segment 10099
+vlan 10
+  vn-segment 10010
+
+router ospf 1
+  router-id 2.2.2.2
+
+router bgp 65000
+  router-id 2.2.2.2
+  address-family ipv4 unicast
+  address-family l2vpn evpn
+  neighbor 3.3.3.3
+	remote-as 65000
+	update-source loopback0
+	address-family ipv4 unicast
+	address-family l2vpn evpn
+		send-community both
+  neighbor 4.4.4.4
+	remote-as 65000
+	update-source loopback0
+	address-family ipv4 unicast
+	address-family l2vpn evpn
+		send-community both
+  vrf Tenant-A
+    address-family ipv4 unicast
+	
+evpn
+  vni 10010 l2
+  rd auto
+  route-target both auto
+
+# Spine1
+feature ospf
+feature bgp
+feature lldp
+nv overlay evpn
+
+hostname Spine1
+
+interface Ethernet1/1
+  no switchport
+  ip address 10.0.12.0/31
+  ip router ospf 1 area 0
+  no shutdown
+
+interface Ethernet1/2
+  no switchport
+  ip address 10.0.14.0/31
+  ip router ospf 1 area 0
+  no shutdown
+  
+interface Ethernet1/49
+  no switchport
+  ip address 10.0.1.2/24
+  ip router ospf 1 area 0
+  no shutdown
+
+ip route 0.0.0.0/0 10.0.1.1
+
+interface loopback0
+  ip address 3.3.3.3/32
+  ip router ospf 1 area 0
+  no shutdown
+ 
+router ospf 1
+  router-id 3.3.3.3
+  default-information originate always
+
+router bgp 65000
+	router-id 3.3.3.3
+	address-family ipv4 unicast
+    address-family l2vpn evpn
+	  retain route-target all
+    neighbor 1.1.1.1
+	  remote-as 65000
+	  update-source loopback0
+	  address-family ipv4 unicast
+		send-community both
+		route-reflector-client
+	  address-family l2vpn evpn
+	    send-community both
+	    route-reflector-client
+    neighbor 2.2.2.2
+	  remote-as 65000
+	  update-source loopback0
+	  address-family ipv4 unicast
+		send-community both
+		route-reflector-client
+	  address-family l2vpn evpn
+	    send-community both
+	    route-reflector-client
+		
+# Spine2
+feature ospf
+feature bgp
+feature lldp
+nv overlay evpn
+
+hostname Spine2
+
+interface Ethernet1/1
+  no switchport
+  ip address 10.0.13.0/31
+  ip router ospf 1 area 0
+  no shutdown
+
+interface Ethernet1/2
+  no switchport
+  ip address 10.0.15.0/31
+  ip router ospf 1 area 0
+  no shutdown
+  
+interface Ethernet1/49
+  no switchport
+  ip address 10.0.2.2/24
+  ip router ospf 1 area 0
+  no shutdown
+
+ip route 0.0.0.0/0 10.0.2.1
+
+interface loopback0
+  ip address 4.4.4.4/32
+  ip router ospf 1 area 0
+  no shutdown
+
+router ospf 1
+  router-id 4.4.4.4
+  default-information originate always
+
+router bgp 65000
+	router-id 4.4.4.4
+	address-family ipv4 unicast
+    address-family l2vpn evpn
+	  retain route-target all
+    neighbor 1.1.1.1
+	  remote-as 65000
+	  update-source loopback0
+	  address-family ipv4 unicast
+		send-community both
+		route-reflector-client
+	  address-family l2vpn evpn
+	    send-community both
+	    route-reflector-client
+    neighbor 2.2.2.2
+	  remote-as 65000
+	  update-source loopback0
+	  address-family ipv4 unicast
+		send-community both
+		route-reflector-client
+	  address-family l2vpn evpn
+	    send-community both
+	    route-reflector-client
+		
