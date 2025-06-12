@@ -137,7 +137,7 @@
   - name: Configure default route
     cisco.nxos.nxos_static_routes:
       config:
-        address_families:
+        - address_families:
           - afi: ipv4
             routes:
               - dest: "0.0.0.0/0"
