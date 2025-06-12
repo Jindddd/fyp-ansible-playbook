@@ -134,4 +134,13 @@
                 route_reflector_client: true
     loop: "{{ groups['leafs'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
 
+  - name: Configure default route
+    cisco.nxos.nxos_static_routes:
+      config:
+        address_families:
+          - afi: ipv4
+            routes:
+              - dest: "0.0.0.0/0"
+                next_hops:
+                  forward_router_address: "{{ default_gateway }}"
 
