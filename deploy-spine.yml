@@ -55,7 +55,8 @@
           - process_id: "{{ ospf.id }}"
             router_id: "{{ loopbacks[0].address | ansible.utils.ipaddr('address') }}"
             default_information:
-              originate: true
+              originate:
+                always: true
                 
   - name: Enable OSPF over loopback interfaces
     cisco.nxos.nxos_ospf_interfaces:

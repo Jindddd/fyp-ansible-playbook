@@ -269,7 +269,9 @@
             vlan: "{{ item.vlan_id }}"
     loop: "{{ access_interfaces }}"
 
-  - name: Create L3VNI SVI
+# These commands are put behind because they are not working to be run before
+# Certain commands, those commands are to be detected.
+  - name: Configure L3VNI SVI IP forward
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.l3_vni.vlan_id }}"
@@ -277,7 +279,7 @@
           ip_forward: true
     loop: "{{ vrfs }}"
 
-  - name: Create L2VNIs SVI
+  - name: Configure L2VNIs SVI fabric_forwarding_anycast_gateway
     cisco.nxos.nxos_interfaces:
       config:
         - name: "vlan{{ item.1.id }}"
