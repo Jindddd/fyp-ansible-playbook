@@ -12,7 +12,7 @@ group_by:
 
 compose:
   # Find the service named 'ansible-ssh' and get the first IP address associated with it.
-  ansible_host: custom_fields.ansible_host | default(primary_ip4.address | split('/') | first, true)
+  ansible_host: custom_fields.ansible_host | default(inventory_hostname, true)
   # Find the service named 'ansible-ssh' and get its first port number.
   ansible_port: custom_fields.ansible_port | default(22, true)
   ansible_network_os: platform.slug
