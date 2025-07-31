@@ -7,8 +7,8 @@ validate_certs: False # Set to True for production with valid SSL
 
 group_by:
   - device_roles
-  - site
-  - device_type
+  - sites
+  - platform
 
 compose:
   # Find the service named 'ansible-ssh' and get the first IP address associated with it.
