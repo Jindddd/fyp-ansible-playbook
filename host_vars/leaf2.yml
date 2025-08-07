@@ -17,8 +17,21 @@ vrfs:
     vlans:
       - id: 10
         vni: 10010
-        svi_address: "192.168.10.2/24"
-    
+        svi_address: "192.168.10.1/24"
+      - id: 20
+        vni: 10020
+        svi_address: "192.168.20.1/24"
+  - name: "Tenant-B"
+    l3_vni:
+      vlan_id: 100
+      vni: 10100
+    vlans:
+      - id: 20
+        vni: 10020
+        svi_address: "192.168.20.1/24"
+
 access_interfaces:
   - id: "1/10"
     vlan_id: 10
+  - id: "1/11"
+    vlan_id: 20
