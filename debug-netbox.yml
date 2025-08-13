@@ -1,8 +1,8 @@
 - name: Debug NetBox Inventory
   hosts: all
-  gather_facts: false  # We don't need to connect, just see the variables
+  gather_facts: false
 
   tasks:
-  - name: Print connection variables for each host
-    ansible.builtin.debug:
-      msg: "Found host {{ inventory_hostname }} with ansible_host={{ ansible_host | default('N/A') }} and ansible_port={{ ansible_port | default('N/A') }}"
+    - name: Print all inventory variables for each host
+      ansible.builtin.debug:
+        var: hostvars[inventory_hostname]

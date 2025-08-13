@@ -1,0 +1,30 @@
+- name: Enable NX-OS features
+  cisco.nxos.nxos_feature:
+    feature: "{{ item }}"
+  loop: "{{ features }}"
+
+- name: Enable EVPN overlay
+  cisco.nxos.nxos_evpn_global:
+    nv_overlay_evpn: true
+
+- name: Set system MTU
+  cisco.nxos.nxos_system:
+    system_mtu: "{{ system_mtu }}"
+
+- name: Configure hostname
+  cisco.nxos.nxos_hostname:
+    config:
+      hostname: "{{ hostname }}"
+
+# Workaround for enable ARP suppression
+# Decrease the vpc-convergence & increase the arp-ether
+- name: Configure TCAM regions for ARP suppression
+  cisco.nxos.nxos_config:
+    lines:
+      - hardware access-list tcam region vpc-convergence 0
+      - hardware access-list tcam region arp-ether 256
+
+- name: Set VXLAN Anycast MAC
+  cisco.nxos.nxos_overlay_global:
+    anycast_gateway_mac: "{{ anycast_gateway_mac }}"
+  when: inventory_hostname in groups['leafs']

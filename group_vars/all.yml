@@ -10,3 +10,5 @@ ospf:
 
 bgp:
   asn: "65000"
+
+system_mtu: 9216

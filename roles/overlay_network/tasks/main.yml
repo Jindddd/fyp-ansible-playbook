@@ -1,0 +1,34 @@
+- name: create VRFs
+  ios_vrf:
+    vrf: "{{ item.name }}"
+    state: present
+  loop: "{{ vrfs }}"
+
+- name: configure L3 VNI per VRF
+  ios_vxlan_vrf:
+    vrf: "{{ item.name }}"
+    vni: "{{ item.l3_vni.vni }}"
+    state: present
+  loop: "{{ vrfs }}"
+
+- name: create VLANs & SVIs
+  vars:
+    vrf_name: "{{ item.0.name }}"
+    vlan: "{{ item.1 }}"
+  block:
+    - ios_vlan:
+        vlan_id: "{{ vlan.id }}"
+        state: present
+    - ios_l3_interface:
+        name: Vlan{{ vlan.id }}
+        vrf: "{{ vrf_name }}"
+        ipv4: "{{ vlan.svi_address }}"
+        state: present
+  loop: "{{ vrfs | subelements('vlans') }}"
+
+- name: configure access interfaces
+  ios_interface:
+    name: Ethernet{{ item.id }}
+    mode: access
+    access_vlan: "{{ item.vlan_id }}"
+  loop: "{{ access_interfaces }}"

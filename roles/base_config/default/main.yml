@@ -1,3 +1,4 @@
+# features to turn on
 features:
   - ospf
   - bgp
@@ -6,4 +7,5 @@ features:
   - nv overlay
   - fabric forwarding
 
-anycast_gateway_mac: "0000.aaaa.bbbb"
+system_mtu: 9216
+anycast_gateway_mac: "0000.5e00.0101"

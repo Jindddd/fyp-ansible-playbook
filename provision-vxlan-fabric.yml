@@ -1,0 +1,23 @@
+- name: Apply Base Configuration to all devices
+  hosts: all
+  gather_facts: false
+  roles:
+    - base_config
+
+# - name: Configure Underlay Network on Spines
+#   hosts: spines
+#   gather_facts: false
+#   roles:
+#     - underlay_spine_config
+
+# - name: Configure Underlay Network on Leafs
+#   hosts: leafs
+#   gather_facts: false
+#   roles:
+#     - underlay_leaf_config
+
+# - name: Configure Overlay Network on Leafs
+#   hosts: leafs
+#   gather_facts: false
+#   roles:
+#     - overlay_leaf_config

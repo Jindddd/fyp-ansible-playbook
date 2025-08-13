@@ -3,31 +3,31 @@
   gather_facts: false
 
   tasks:
-  - name: Enable features
-    cisco.nxos.nxos_feature:
-        feature: "{{ item }}"
-    loop: "{{ features }}"
+  # - name: Enable features
+  #   cisco.nxos.nxos_feature:
+  #       feature: "{{ item }}"
+  #   loop: "{{ features }}"
 
-  - name: Enable overlay EVPN
-    cisco.nxos.nxos_evpn_global:
-      nv_overlay_evpn: true
+  # - name: Enable overlay EVPN
+  #   cisco.nxos.nxos_evpn_global:
+  #     nv_overlay_evpn: true
 
-  - name: Chagen the system mtu to 9216
-    cisco.nxos.nxos_system:
-      system_mtu: 9216
+  # - name: Chagen the system mtu to 9216
+  #   cisco.nxos.nxos_system:
+  #     system_mtu: 9216
 
-  - name: Configure hostname
-    cisco.nxos.nxos_hostname:
-      config:
-        hostname: "{{ hostname }}"
+  # - name: Configure hostname
+  #   cisco.nxos.nxos_hostname:
+  #     config:
+  #       hostname: "{{ hostname }}"
 
   # To decrease the vpc-convergence & increase the arp-ether
   # TCAM regions in order to allow ARP Suppression.
-  - name: Configure TCAM regions
-    cisco.nxos.nxos_config:
-      lines:
-        - hardware access-list tcam region vpc-convergence 0
-        - hardware access-list tcam region arp-ether 256
+  # - name: Configure TCAM regions
+  #   cisco.nxos.nxos_config:
+  #     lines:
+  #       - hardware access-list tcam region vpc-convergence 0
+  #       - hardware access-list tcam region arp-ether 256
 
   - name: Configure loopback interfaces
     cisco.nxos.nxos_interfaces:
@@ -166,9 +166,9 @@
           mapped_vni: "{{ item.l3_vni.vni }}"
     loop: "{{ vrfs }}"
 
-  - name: Set anycast MAC
-    cisco.nxos.nxos_overlay_global:
-      anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
+  # - name: Set anycast MAC
+  #   cisco.nxos.nxos_overlay_global:
+  #     anycast_gateway_mac: "{{ anycast_gateway_mac.mac_address }}"
 
   - name: Configure VRFs address-family
     cisco.nxos.nxos_vrf_af:
