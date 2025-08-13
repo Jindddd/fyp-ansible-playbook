@@ -14,7 +14,7 @@
 - name: Configure hostname
   cisco.nxos.nxos_hostname:
     config:
-      hostname: "{{ hostname }}"
+      hostname: inventory_hostname
 
 # Workaround for enable ARP suppression
 # Decrease the vpc-convergence & increase the arp-ether
