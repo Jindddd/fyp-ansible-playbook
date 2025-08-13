@@ -1,5 +1,7 @@
 - name: Apply Base Configuration to all devices
-  hosts: all
+  hosts: 
+    - device_roles_leaf-switch
+    - device_roles_spine-switch
   gather_facts: false
   roles:
     - base_config
