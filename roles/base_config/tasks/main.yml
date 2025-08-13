@@ -27,4 +27,4 @@
 - name: Set VXLAN Anycast MAC
   cisco.nxos.nxos_overlay_global:
     anycast_gateway_mac: "{{ anycast_gateway_mac }}"
-  when: inventory_hostname in groups['leafs']
+  when: inventory_hostname in groups['device_roles_leaf-switch']
