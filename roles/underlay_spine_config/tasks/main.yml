@@ -4,6 +4,8 @@
       - name: "{{ item.name }}"
         enabled: true
     loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+              api_endpoints=api_endpoint,
+              token=token,
               api_filter='device={{ inventory_hostname }}&name__ic=loopback') }}"
 
 - name: Configure loopback interfaces - ip address
@@ -13,6 +15,8 @@
         ipv4:
           - address: "{{ item.address }}"
     loop: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_endpoints=api_endpoint,
+              token=token,
               api_filter='device={{ inventory_hostname }}&name__ic=loopback') }}"
 
 # - name: configure underlay point‐to‐point interfaces

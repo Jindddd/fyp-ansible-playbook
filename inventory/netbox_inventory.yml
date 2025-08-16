@@ -1,6 +1,4 @@
 plugin: netbox.netbox.nb_inventory
-api_endpoint: http://20.244.9.88:8000
-token: 14d9e67df5aae036a55235d4e8c2f0312f21028a
 
 config_context: False
 validate_certs: False # Set to True for production with valid SSL
