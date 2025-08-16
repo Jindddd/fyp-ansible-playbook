@@ -4,9 +4,6 @@ ansible_network_os: cisco.nxos.nxos
 ansible_connection: ansible.netcommon.network_cli
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o HostKeyAlgorithms=+ssh-rsa'
 
-api_endpoint: http://20.244.9.88:8000
-token: 14d9e67df5aae036a55235d4e8c2f0312f21028a
-
 ospf:
   id: "1"
   area: "0"
