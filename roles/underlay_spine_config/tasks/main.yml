@@ -4,7 +4,7 @@
       {{ query('netbox.netbox.nb_lookup','interfaces',
           api_endpoint=netbox_url,
           token=netbox_token,
-          api_filter: 'device={{ inventory_hostname }}&name__ic=loopback'
+          api_filter= 'device={{ inventory_hostname }}&name__ic=loopback'
       ) }}
 
 - name: Debug loopback_intfs
