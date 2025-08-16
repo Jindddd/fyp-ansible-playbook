@@ -1,0 +1,25 @@
+- name: configure loopback interfaces
+  cisco.nxos.nxos_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        enabled: true
+    loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+              api_filter='device={{ inventory_hostname }}&name__ic=loopback') }}"
+
+- name: Configure loopback interfaces - ip address
+  cisco.nxos.nxos_l3_interfaces:
+    config:
+      - name: "{{ item.assigned_object.name }}"
+        ipv4:
+          - address: "{{ item.address }}"
+    loop: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_filter='device={{ inventory_hostname }}&name__ic=loopback') }}"
+
+# - name: configure underlay point‐to‐point interfaces
+#   cisco.nxos.nxos_interfaces:
+#     config:
+#       - name: "Ethernet{{ item.id }}"
+#         enabled: true
+#     ipv4: "{{ item.address }}"
+#     state: present
+#   loop: "{{ underlay_interfaces }}"

@@ -6,11 +6,11 @@
   roles:
     - base_config
 
-# - name: Configure Underlay Network on Spines
-#   hosts: spines
-#   gather_facts: false
-#   roles:
-#     - underlay_spine_config
+- name: Configure Underlay Network on Spines
+  hosts: device_roles_spine-switch
+  gather_facts: false
+  roles:
+    - underlay_spine_config
 
 # - name: Configure Underlay Network on Leafs
 #   hosts: leafs
