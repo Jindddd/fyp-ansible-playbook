@@ -1,12 +1,9 @@
 - name: Fetch loopback interfaces from NetBox
   set_fact:
     loopback_intfs: >-
-      {{ query(
-          'netbox.netbox.nb_lookup',
-          'interfaces',
+      {{ query('netbox.netbox.nb_lookup','interfaces',
           api_endpoint=netbox_url,
           token=netbox_token,
-          validate_certs: false,
           api_filter: 'device={{ inventory_hostname }}&name__ic=loopback'
       ) }}
 
