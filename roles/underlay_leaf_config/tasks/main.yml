@@ -1,20 +1,3 @@
-- name: configure loopback interfaces
-  ios_interface:
-    name: Loopback{{ item.id }}
-    enabled: true
-    ipv4: "{{ item.address }}"
-    state: present
-  loop: "{{ loopbacks }}"
-
-- name: configure underlay point‐to‐point interfaces
-  ios_interface:
-    name: Ethernet{{ item.id }}
-    enabled: true
-    ipv4: "{{ item.address }}"
-    state: present
-  loop: "{{ underlay_interfaces }}"
-
-
 - name: Fetch loopback interfaces from NetBox
   set_fact:
     loopback_intfs: >-
