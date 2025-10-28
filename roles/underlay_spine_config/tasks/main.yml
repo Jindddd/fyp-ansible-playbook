@@ -22,7 +22,20 @@
             api_filter='device='+inventory_hostname+' name__ic=loopback')
             | map(attribute='value') }}"
 
-- name: Configure loopback interfaces - ip address
+- name: Configure underlay interfaces
+  cisco.nxos.nxos_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        mtu: "{{ item.mtu }}"
+        enabled: "{{ item.enabled }}"
+        mode: layer3
+  loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+            api_endpoint=netbox_url,
+            token=netbox_token,
+            api_filter='device='+inventory_hostname+' name__ic=Eth')
+            | map(attribute='value') }}"
+
+- name: Configure loopback & underlay interfaces - ip address
   cisco.nxos.nxos_l3_interfaces:
     config:
       - name: "{{ item.assigned_object.name }}"
@@ -31,5 +44,5 @@
   loop: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses',
             api_endpoint=netbox_url,
             token=netbox_token,
-            api_filter='device='+inventory_hostname+' name__ic=loopback') 
+            api_filter='device='+inventory_hostname) 
             | map(attribute='value') }}"
