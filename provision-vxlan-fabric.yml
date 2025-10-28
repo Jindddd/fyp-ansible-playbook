@@ -1,19 +1,19 @@
-# - name: Apply Base Configuration to all devices
-#   hosts: 
-#     - device_roles_leaf-switch
-#     - device_roles_spine-switch
-#   gather_facts: false
-#   roles:
-#     - base_config
+- name: Apply Base Configuration to all devices
+  hosts: 
+    - device_roles_leaf-switch
+    - device_roles_spine-switch
+  gather_facts: false
+  roles:
+    - base_config
 
-# - name: Configure Underlay Network on Spines
-#   hosts: device_roles_spine-switch
-#   gather_facts: false
-#   roles:
-#     - underlay_spine_config
+- name: Configure Underlay Network on Spines
+  hosts: device_roles_spine-switch
+  gather_facts: false
+  roles:
+    - underlay_spine_config
 
 - name: Configure Underlay Network on Leafs
-  hosts: device_roles_leaf-switch
+  hosts: device_roles_leaf-switch 
   gather_facts: false
   roles:
     - underlay_leaf_config
