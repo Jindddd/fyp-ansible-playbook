@@ -1,15 +1,15 @@
-- name: Fetch loopback interfaces from NetBox
-  set_fact:
-    loopback_intfs: >-
-      {{ query('netbox.netbox.nb_lookup','interfaces',
-          api_endpoint=netbox_url,
-          token=netbox_token,
-          api_filter= 'device='+inventory_hostname+' name__ic=loopback'
-      ) | map(attribute='value') }}
+# - name: Fetch loopback interfaces from NetBox
+#   set_fact:
+#     loopback_intfs: >-
+#       {{ query('netbox.netbox.nb_lookup','interfaces',
+#           api_endpoint=netbox_url,
+#           token=netbox_token,
+#           api_filter= 'device='+inventory_hostname+' name__ic=loopback'
+#       ) | map(attribute='value') }}
 
-- name: Debug loopback_intfs
-  debug:
-    var: loopback_intfs
+# - name: Debug loopback_intfs
+#   debug:
+#     var: loopback_intfs
 
 - name: Configure loopback interfaces
   cisco.nxos.nxos_interfaces:
@@ -33,12 +33,3 @@
             token=netbox_token,
             api_filter='device='+inventory_hostname+' name__ic=loopback') 
             | map(attribute='value') }}"
-
-# - name: configure underlay point‐to‐point interfaces
-#   cisco.nxos.nxos_interfaces:
-#     config:
-#       - name: "Ethernet{{ item.id }}"
-#         enabled: true
-#     ipv4: "{{ item.address }}"
-#     state: present
-#   loop: "{{ underlay_interfaces }}"
