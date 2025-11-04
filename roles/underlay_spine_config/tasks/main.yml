@@ -5,7 +5,7 @@
           api_endpoint=netbox_url,
           token=netbox_token,
           api_filter= 'device='+inventory_hostname+' name__ic=loopback'
-      ) | map(attribute='value') }}
+      ) | map(attribute='bridge') }}
 
 - name: Debug loopback_intfs
   debug:
