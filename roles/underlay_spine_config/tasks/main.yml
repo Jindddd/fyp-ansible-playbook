@@ -49,8 +49,8 @@
 #             | map(attribute='value') }}"
 
 - name: Fetch loopback interfaces from NetBox
-  debug: >-
-    "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+  debug:
+    msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
           api_endpoint=netbox_url,
           token=netbox_token,
           api_filter='device='+inventory_hostname+' name__ic=loopback')
