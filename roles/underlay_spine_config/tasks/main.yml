@@ -55,7 +55,8 @@
           token=netbox_token,
           api_filter='device='+inventory_hostname+' name__ic=loopback')
           | map(attribute='value')
-          | selectattr('assigned_object.name', 'search', '(?i)^loopback') }}"
+          | selectattr('assigned_object.name', 'search', '(?i)^loopback')
+          ) }}"
 
 - name: Debug first loopback interface name
   debug:
