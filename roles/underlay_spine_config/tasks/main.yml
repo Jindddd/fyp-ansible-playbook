@@ -82,7 +82,7 @@
               originate:
                 always: true
                 
-- name: Enable OSPF over loopback interfaces
+- name: Enable OSPF over loopback and underlay interfaces
   cisco.nxos.nxos_ospf_interfaces:
       config:
         - name: "{{ item.name }}"
@@ -95,17 +95,5 @@
   loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
             api_endpoint=netbox_url,
             token=netbox_token,
-            api_filter='device='+inventory_hostname+' name__ic=loopback')
+            api_filter='device='+inventory_hostname+' enabled=true')
             | map(attribute='value') }}"
-
-# - name: Enable OSPF over underlay interfaces
-#   cisco.nxos.nxos_ospf_interfaces:
-#       config:
-#         - name: "Ethernet{{ item.id }}"
-#           address_family:
-#             - afi: ipv4
-#               processes:
-#                 - process_id: "{{ ospf.id }}"
-#                   area:
-#                     area_id: "{{ ospf.area }}"
-#   loop: "{{ underlay_interfaces }}"
