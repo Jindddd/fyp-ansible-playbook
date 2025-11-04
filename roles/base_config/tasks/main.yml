@@ -28,3 +28,12 @@
   cisco.nxos.nxos_overlay_global:
     anycast_gateway_mac: "{{ anycast_gateway_mac }}"
   when: inventory_hostname in groups['device_roles_leaf-switch']
+
+- name: Debug device role and inventory groups
+  debug:
+    msg:
+      - "host: {{ inventory_hostname }}"
+      - "groups: {{ group_names }}"
+      - "is_spine_group: {{ ('device_roles_spine-switch' in group_names) | ternary('yes','no') }}"
+      - "is_leaf_group: {{ ('device_roles_leaf-switch' in group_names) | ternary('yes','no') }}"
+      - "role_path: {{ role_path | default('undefined') }}"
