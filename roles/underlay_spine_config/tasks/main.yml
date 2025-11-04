@@ -1,51 +1,64 @@
-# - name: Fetch loopback interfaces from NetBox
-#   set_fact:
-#     loopback_intfs: >-
-#       {{ query('netbox.netbox.nb_lookup','interfaces',
-#           api_endpoint=netbox_url,
-#           token=netbox_token,
-#           api_filter= 'device='+inventory_hostname+' name__ic=loopback'
-#       ) | map(attribute='value') }}
+- name: Fetch loopback interfaces from NetBox
+  set_fact:
+    loopback_intfs: >-
+      {{ query('netbox.netbox.nb_lookup','interfaces',
+          api_endpoint=netbox_url,
+          token=netbox_token,
+          api_filter= 'device='+inventory_hostname+' name__ic=loopback'
+      ) | map(attribute='value') }}
 
-# - name: Debug loopback_intfs
-#   debug:
-#     var: loopback_intfs
+- name: Debug loopback_intfs
+  debug:
+    var: loopback_intfs
 
-- name: Configure loopback interfaces
-  cisco.nxos.nxos_interfaces:
-    config:
-      - name: "{{ item.name }}"
-        enabled: true
-  loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
-            api_endpoint=netbox_url,
-            token=netbox_token,
-            api_filter='device='+inventory_hostname+' name__ic=loopback')
-            | map(attribute='value') }}"
+- name: Fetch loopback interfaces from NetBox (no map)
+  set_fact:
+    loopback_intfs_no_map: >-
+      {{ query('netbox.netbox.nb_lookup','interfaces',
+          api_endpoint=netbox_url,
+          token=netbox_token,
+          api_filter= 'device='+inventory_hostname+' name__ic=loopback') }}
 
-- name: Configure underlay interfaces
-  cisco.nxos.nxos_interfaces:
-    config:
-      - name: "{{ item.name }}"
-        enabled: "{{ item.enabled }}"
-        mtu: "{{ item.mtu if item.enabled else omit }}"
-        mode: "{{ 'layer3' if item.enabled else omit }}"
-  loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
-            api_endpoint=netbox_url,
-            token=netbox_token,
-            api_filter='device='+inventory_hostname+' name__ic=Eth')
-            | map(attribute='value') }}"
+- name: Debug loopback_intfs
+  debug:
+    var: loopback_intfs_no_map
 
-- name: Configure loopback & underlay interfaces - ip address
-  cisco.nxos.nxos_l3_interfaces:
-    config:
-      - name: "{{ item.assigned_object.name }}"
-        ipv4:
-          - address: "{{ item.address }}"
-  loop: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses',
-            api_endpoint=netbox_url,
-            token=netbox_token,
-            api_filter='device='+inventory_hostname) 
-            | map(attribute='value') }}"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Working Code
+# - name: Configure loopback interfaces
+#   cisco.nxos.nxos_interfaces:
+#     config:
+#       - name: "{{ item.name }}"
+#         enabled: true
+#   loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+#             api_endpoint=netbox_url,
+#             token=netbox_token,
+#             api_filter='device='+inventory_hostname+' name__ic=loopback')
+#             | map(attribute='value') }}"
+
+# - name: Configure underlay interfaces
+#   cisco.nxos.nxos_interfaces:
+#     config:
+#       - name: "{{ item.name }}"
+#         enabled: "{{ item.enabled }}"
+#         mtu: "{{ item.mtu if item.enabled else omit }}"
+#         mode: "{{ 'layer3' if item.enabled else omit }}"
+#   loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+#             api_endpoint=netbox_url,
+#             token=netbox_token,
+#             api_filter='device='+inventory_hostname+' name__ic=Eth')
+#             | map(attribute='value') }}"
+
+# - name: Configure loopback & underlay interfaces - ip address
+#   cisco.nxos.nxos_l3_interfaces:
+#     config:
+#       - name: "{{ item.assigned_object.name }}"
+#         ipv4:
+#           - address: "{{ item.address }}"
+#   loop: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses',
+#             api_endpoint=netbox_url,
+#             token=netbox_token,
+#             api_filter='device='+inventory_hostname) 
+#             | map(attribute='value') }}"
 
 - name: Debug first loopback interface name
   debug:
@@ -55,7 +68,7 @@
           api_filter='device='+inventory_hostname+' name__ic=loopback')
           | map(attribute='value')
           | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-          | list | first ).item.assigned_object.name }}"
+          | list | first ).assigned_object.name }}"
 
 - name: Debug first loopback interface address
   debug:
@@ -65,7 +78,7 @@
           api_filter='device='+inventory_hostname+' name__ic=loopback')
           | map(attribute='value')
           | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-          | list | first ).item.address }}"
+          | list | first ).address }}"
 
 # - name: Enable OSPF
 #   cisco.nxos.nxos_ospfv2:

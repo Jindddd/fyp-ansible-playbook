@@ -36,22 +36,22 @@
   #           - address: "{{ item.address }}"
   #   loop: "{{ loopbacks }}"
 
-  - name: Configure underlay interfaces
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "Ethernet{{ item.id }}"
-          enabled: true
-          mtu: 9216
-          mode: layer3
-    loop: "{{ underlay_interfaces }}"
+  # - name: Configure underlay interfaces
+  #   cisco.nxos.nxos_interfaces:
+  #     config:
+  #       - name: "Ethernet{{ item.id }}"
+  #         enabled: true
+  #         mtu: 9216
+  #         mode: layer3
+  #   loop: "{{ underlay_interfaces }}"
 
-  - name: Configure underlay interfaces - ip address
-    cisco.nxos.nxos_l3_interfaces:
-      config:
-        - name: "Ethernet{{ item.id }}"
-          ipv4:
-            - address: "{{ item.address }}"
-    loop: "{{ underlay_interfaces }}"
+  # - name: Configure underlay interfaces - ip address
+  #   cisco.nxos.nxos_l3_interfaces:
+  #     config:
+  #       - name: "Ethernet{{ item.id }}"
+  #         ipv4:
+  #           - address: "{{ item.address }}"
+  #   loop: "{{ underlay_interfaces }}"
 
   - name: Enable OSPF
     cisco.nxos.nxos_ospfv2:
