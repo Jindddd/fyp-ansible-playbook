@@ -119,7 +119,7 @@
       neighbors:
         - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address') }}"
           remote_as: "{{ bgp.asn }}"
-          update_source: "{{ item.name }}"
+          update_source: "{{ item.assigned_object.name }}"
   loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
               api_endpoint=netbox_url,
               token=netbox_token,
