@@ -1,15 +1,12 @@
-# - name: Fetch loopback interfaces from NetBox
-#   set_fact:
-#     loopback_intfs: >-
-#       {{ query('netbox.netbox.nb_lookup','interfaces',
-#           api_endpoint=netbox_url,
-#           token=netbox_token,
-#           api_filter= 'device='+inventory_hostname+' name__ic=loopback'
-#       ) | map(attribute='value') }}
-
-# - name: Debug loopback_intfs
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEBUG
+# - name: Debug loopback interfaces from NetBox
 #   debug:
-#     var: loopback_intfs
+#     msg: >-
+#       {{ query('netbox.netbox.nb_lookup','interfaces',
+#         api_endpoint=netbox_url,
+#         token=netbox_token,
+#         api_filter= 'device='+inventory_hostname+' name__ic=loopback')
+#         | map(attribute='value') }}
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Working Code
 # - name: Configure loopback interfaces
@@ -48,25 +45,26 @@
 #             api_filter='device='+inventory_hostname) 
 #             | map(attribute='value') }}"
 
-- name: Debug first loopback interface name
-  debug:
-    msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
-          api_endpoint=netbox_url,
-          token=netbox_token,
-          api_filter='device='+inventory_hostname+' name__ic=loopback')
-          | map(attribute='value')
-          | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-          | list | first ).assigned_object.name }}"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEBUG
+# - name: Debug first loopback interface name
+#   debug:
+#     msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+#           api_endpoint=netbox_url,
+#           token=netbox_token,
+#           api_filter='device='+inventory_hostname+' name__ic=loopback')
+#           | map(attribute='value')
+#           | selectattr('assigned_object.name', 'search', '(?i)^loopback')
+#           | list | first ).assigned_object.name }}"
 
-- name: Debug first loopback interface address
-  debug:
-    msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
-          api_endpoint=netbox_url,
-          token=netbox_token,
-          api_filter='device='+inventory_hostname)
-          | map(attribute='value')
-          | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-          | list | first ).address }}"
+# - name: Debug first loopback interface address
+#   debug:
+#     msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+#           api_endpoint=netbox_url,
+#           token=netbox_token,
+#           api_filter='device='+inventory_hostname)
+#           | map(attribute='value')
+#           | selectattr('assigned_object.name', 'search', '(?i)^loopback')
+#           | list | first ).address }}"
 
 - name: Enable OSPF
   cisco.nxos.nxos_ospfv2:
@@ -84,17 +82,21 @@
               originate:
                 always: true
                 
-# - name: Enable OSPF over loopback interfaces
-#   cisco.nxos.nxos_ospf_interfaces:
-#       config:
-#         - name: "loopback {{ item.id }}"
-#           address_family:
-#             - afi: ipv4
-#               processes:
-#                 - process_id: "{{ ospf.id }}"
-#                   area:
-#                     area_id: "{{ ospf.area }}"
-#   loop: "{{ loopbacks }}"
+- name: Enable OSPF over loopback interfaces
+  cisco.nxos.nxos_ospf_interfaces:
+      config:
+        - name: "{{ item.name }}"
+          address_family:
+            - afi: ipv4
+              processes:
+                - process_id: "{{ ospf.id }}"
+                  area:
+                    area_id: "{{ ospf.area }}"
+  loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+            api_endpoint=netbox_url,
+            token=netbox_token,
+            api_filter='device='+inventory_hostname+' name__ic=loopback')
+            | map(attribute='value') }}"
 
 # - name: Enable OSPF over underlay interfaces
 #   cisco.nxos.nxos_ospf_interfaces:
