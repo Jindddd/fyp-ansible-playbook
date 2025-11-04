@@ -102,9 +102,25 @@
 #             route_target:
 #               retain_all: true
 
-- name: Debug
-  debug:
-    msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+# - name: Debug
+#   debug:
+#     msg: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+#               api_endpoint=netbox_url,
+#               token=netbox_token,
+#               api_filter='role=loopback')
+#               | map(attribute='value')
+#               | selectattr('assigned_object.device.name', 'search', '(?i)^leaf')
+#               | list ) }}"
+
+- name: Configure BGP neighbors
+  cisco.nxos.nxos_bgp_global:
+    config:
+      as_number: "{{ bgp.asn }}"
+      neighbors:
+        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address')}}"
+          remote_as: "{{ bgp.asn }}"
+          update_source: "{{ item.name }}"
+  loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
               api_endpoint=netbox_url,
               token=netbox_token,
               api_filter='role=loopback')
@@ -112,47 +128,37 @@
               | selectattr('assigned_object.device.name', 'search', '(?i)^leaf')
               | list ) }}"
 
-# - name: Configure BGP neighbors
-#   cisco.nxos.nxos_bgp_global:
-#     config:
-#       as_number: "{{ bgp.asn }}"
-#       neighbors:
-#         - neighbor_address: "{{ item | ansible.utils.ipaddr('address')}}"
-#           remote_as: "{{ bgp.asn }}"
-#           update_source: "loopback {{ loopbacks[0].id }}"
-#   loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
-#               api_endpoint=netbox_url,
-#               token=netbox_token,
-#               api_filter='device='+inventory_hostname+' role=loopback')
-#               | map(attribute='value')
-#               | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-#               | list | first ).address | ansible.utils.ipaddr('address') }}"
+- name: Configure BGP neighbor address families
+  cisco.nxos.nxos_bgp_neighbor_address_family:
+    config:
+      as_number: "{{ bgp.asn }}"
+      neighbors:         
+        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address')}}"
+          address_family:
+            - afi: ipv4
+              safi: unicast
+              send_community:
+                both: true
+              route_reflector_client: true
+            - afi: l2vpn
+              safi: evpn
+              send_community:
+                both: true
+              route_reflector_client: true
+  loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_endpoint=netbox_url,
+              token=netbox_token,
+              api_filter='role=loopback')
+              | map(attribute='value')
+              | selectattr('assigned_object.device.name', 'search', '(?i)^leaf')
+              | list ) }}"
 
-# - name: Configure BGP neighbor address families
-#   cisco.nxos.nxos_bgp_neighbor_address_family:
-#     config:
-#       as_number: "{{ bgp.asn }}"
-#       neighbors:         
-#         - neighbor_address: "{{ item | ansible.utils.ipaddr('address') }}"
-#           address_family:
-#             - afi: ipv4
-#               safi: unicast
-#               send_community:
-#                 both: true
-#               route_reflector_client: true
-#             - afi: l2vpn
-#               safi: evpn
-#               send_community:
-#                 both: true
-#               route_reflector_client: true
-#   loop: "{{ groups['leafs'] | map('extract', hostvars, ['loopbacks', 0, 'address']) | list }}"
-
-# - name: Configure default route
-#   cisco.nxos.nxos_static_routes:
-#     config:
-#       - address_families:
-#         - afi: ipv4
-#           routes:
-#             - dest: "0.0.0.0/0"
-#               next_hops:
-#                 - forward_router_address: "{{ default_gateway }}"
+- name: Configure default route
+  cisco.nxos.nxos_static_routes:
+    config:
+      - address_families:
+        - afi: ipv4
+          routes:
+            - dest: "0.0.0.0/0"
+              next_hops:
+                - forward_router_address: "{{ default_gateway }}"
