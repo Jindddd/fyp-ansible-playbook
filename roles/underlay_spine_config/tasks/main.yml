@@ -79,7 +79,7 @@
               api_filter='device='+inventory_hostname)
               | map(attribute='value')
               | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-              | list | first ).address }}"
+              | list | first ).address | ansible.utils.ipaddr('address') }}"
             default_information:
               originate:
                 always: true
