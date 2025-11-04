@@ -46,3 +46,8 @@
             token=netbox_token,
             api_filter='device='+inventory_hostname) 
             | map(attribute='value') }}"
+
+- name: Debug ospf variable
+  debug:
+    msg:
+      - "Debug OSPF ID, OSPF AREA: {{ ospf.id }}, {{ ospf.area }}"
