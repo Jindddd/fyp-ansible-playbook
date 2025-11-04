@@ -117,7 +117,7 @@
     config:
       as_number: "{{ bgp.asn }}"
       neighbors:
-        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address')}}"
+        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address') }}"
           remote_as: "{{ bgp.asn }}"
           update_source: "{{ item.name }}"
   loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
@@ -133,7 +133,7 @@
     config:
       as_number: "{{ bgp.asn }}"
       neighbors:         
-        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address')}}"
+        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address') }}"
           address_family:
             - afi: ipv4
               safi: unicast
