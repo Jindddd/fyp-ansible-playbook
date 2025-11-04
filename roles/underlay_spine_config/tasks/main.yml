@@ -108,7 +108,7 @@
               api_endpoint=netbox_url,
               token=netbox_token,
               api_filter='role=loopback')
-              | map(attribute='value'))}}"
+              | map(attribute='value')) }}"
 
 # - name: Configure BGP neighbors
 #   cisco.nxos.nxos_bgp_global:
