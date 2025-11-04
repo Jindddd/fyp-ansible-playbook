@@ -11,6 +11,16 @@
   gather_facts: false
   roles:
     - underlay_spine_config
+  
+  pre_tasks:
+    - name: Debug effective variables from group_vars
+      debug:
+        msg:
+          - "inventory_hostname: {{ inventory_hostname }}"
+          - "ospf: {{ ospf | default('undefined') }}"
+          - "bgp.asn: {{ bgp.asn | default('undefined') }}"
+          - "default_gateway: {{ default_gateway | default('undefined') }}"
+          - "netbox_url: {{ netbox_url | default('undefined') }}"
 
 # - name: Configure Underlay Network on Leafs
 #   hosts: device_roles_leaf-switch 
