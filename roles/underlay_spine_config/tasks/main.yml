@@ -56,7 +56,7 @@
           api_filter='device='+inventory_hostname+' name__ic=loopback')
           | map(attribute='value')
           | selectattr('assigned_object.name', 'search', '(?i)^loopback')
-          | list ) }}"
+          | list ).assigned_object }}"
 
 - name: Debug first loopback interface name
   debug:
