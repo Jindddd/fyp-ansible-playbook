@@ -59,9 +59,6 @@
               | map(attribute='value')
               | selectattr('assigned_object.name', 'search', '(?i)^loopback')
               | list | first ).address | ansible.utils.ipaddr('address') }}"
-            default_information:
-              originate:
-                always: true
                 
 - name: Enable OSPF over loopback and underlay interfaces
   cisco.nxos.nxos_ospf_interfaces:
