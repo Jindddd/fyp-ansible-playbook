@@ -12,7 +12,7 @@
   cisco.nxos.nxos_interfaces:
     config:
       - name: "{{ item.name }}"
-        enabled: true
+        enabled: "{{ item.enabled }}"
   loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
             api_endpoint=netbox_url,
             token=netbox_token,
@@ -151,3 +151,4 @@
             - dest: "0.0.0.0/0"
               next_hops:
                 - forward_router_address: "{{ default_gateway }}"
+

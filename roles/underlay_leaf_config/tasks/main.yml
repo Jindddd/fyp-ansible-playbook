@@ -15,14 +15,27 @@
   cisco.nxos.nxos_interfaces:
     config:
       - name: "{{ item.name }}"
-        enabled: true
+        enabled: "{{ item.enabled }}"
   loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
             api_endpoint=netbox_url,
             token=netbox_token,
             api_filter='device='+inventory_hostname+' name__ic=loopback')
             | map(attribute='value') }}"
 
-- name: Configure loopback interfaces - ip address
+- name: Configure underlay interfaces
+  cisco.nxos.nxos_interfaces:
+    config:
+      - name: "{{ item.name }}"
+        enabled: "{{ item.enabled }}"
+        mtu: "{{ item.mtu if item.enabled else omit }}"
+        mode: "{{ 'layer3' if item.enabled else omit }}"
+  loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+            api_endpoint=netbox_url,
+            token=netbox_token,
+            api_filter='device='+inventory_hostname+' name__ic=Eth')
+            | map(attribute='value') }}"
+
+- name: Configure loopback & underlay interfaces - ip address
   cisco.nxos.nxos_l3_interfaces:
     config:
       - name: "{{ item.assigned_object.name }}"
@@ -31,5 +44,103 @@
   loop: "{{ query('netbox.netbox.nb_lookup', 'ip-addresses',
             api_endpoint=netbox_url,
             token=netbox_token,
-            api_filter='device='+inventory_hostname+' name__ic=loopback') 
+            api_filter='device='+inventory_hostname) 
             | map(attribute='value') }}"
+
+- name: Enable OSPF
+  cisco.nxos.nxos_ospfv2:
+      config:
+        processes:
+          - process_id: "{{ ospf.id }}"
+            router_id: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_endpoint=netbox_url,
+              token=netbox_token,
+              api_filter='device='+inventory_hostname)
+              | map(attribute='value')
+              | selectattr('assigned_object.name', 'search', '(?i)^loopback')
+              | list | first ).address | ansible.utils.ipaddr('address') }}"
+            default_information:
+              originate:
+                always: true
+                
+- name: Enable OSPF over loopback and underlay interfaces
+  cisco.nxos.nxos_ospf_interfaces:
+      config:
+        - name: "{{ item.name }}"
+          address_family:
+            - afi: ipv4
+              processes:
+                - process_id: "{{ ospf.id }}"
+                  area:
+                    area_id: "{{ ospf.area }}"
+  loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+            api_endpoint=netbox_url,
+            token=netbox_token,
+            api_filter='device='+inventory_hostname+' enabled=true')
+            | map(attribute='value') }}"
+
+- name: Enable BGP
+  cisco.nxos.nxos_bgp_global:
+    config:
+      as_number: "{{ bgp.asn }}"
+      router_id: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_endpoint=netbox_url,
+              token=netbox_token,
+              api_filter='device='+inventory_hostname)
+              | map(attribute='value')
+              | selectattr('assigned_object.name', 'search', '(?i)^loopback')
+              | list | first ).address | ansible.utils.ipaddr('address') }}"
+
+- name: Configure BGP address families
+  cisco.nxos.nxos_bgp_address_family:
+    config:
+      as_number: "{{ bgp.asn }}"
+      address_family:
+        - afi: ipv4
+          safi: unicast
+        - afi: l2vpn
+          safi: evpn
+          retain:
+            route_target:
+              retain_all: true
+
+- name: Configure BGP neighbors
+  cisco.nxos.nxos_bgp_global:
+    config:
+      as_number: "{{ bgp.asn }}"
+      neighbors:
+        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address') }}"
+          remote_as: "{{ bgp.asn }}"
+          update_source: "{{ item.assigned_object.name }}"
+  loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_endpoint=netbox_url,
+              token=netbox_token,
+              api_filter='role=loopback')
+              | map(attribute='value')
+              | selectattr('assigned_object.device.name', 'search', '(?i)^spine')
+              | list ) }}"
+
+- name: Configure BGP neighbor address families
+  cisco.nxos.nxos_bgp_neighbor_address_family:
+    config:
+      as_number: "{{ bgp.asn }}"
+      neighbors:         
+        - neighbor_address: "{{ item.address | ansible.utils.ipaddr('address') }}"
+          address_family:
+            - afi: ipv4
+              safi: unicast
+              send_community:
+                both: true
+              route_reflector_client: true
+            - afi: l2vpn
+              safi: evpn
+              send_community:
+                both: true
+              route_reflector_client: true
+  loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
+              api_endpoint=netbox_url,
+              token=netbox_token,
+              api_filter='role=loopback')
+              | map(attribute='value')
+              | selectattr('assigned_object.device.name', 'search', '(?i)^spine')
+              | list ) }}"
