@@ -8,7 +8,10 @@
   tasks:
   - name: Print the Raw Data Variable
     debug:
-      var: data
+      msg:
+        - "Data: {{ data }}"
+        - "Event: {{ event }}"
+        - "Timestamp: {{ timestamp }}"
 
   - name: Fetch Device Current Mapping
     set_fact:
