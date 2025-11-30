@@ -6,4 +6,4 @@ features:
   - nv overlay
   - fabric forwarding
 
-anycast_gateway_mac: "0000.aaaa.bbbb"
+anycast_gateway_mac: "0000.5e00.0101"

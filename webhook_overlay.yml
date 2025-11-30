@@ -1,0 +1,55 @@
+- name:  Configure L2VPNs & Server Ports on Leaf switchs (Runs on interface changes)
+  hosts: localhost
+  gather_facts: false
+  
+  vars:
+    access_vlan_object: "{{ data['untagged_vlan'] }}"
+
+  tasks:
+  - name: Print the Raw Data Variable
+    debug:
+      var: data
+
+  - name: Fetch Device Current Mapping
+    set_fact:
+      current_map: "{{ (query('netbox.netbox.nb_lookup', 'devices',
+                        api_endpoint=netbox_url,
+                        token=netbox_token,
+                        api_filter='name='+inventory_hostname
+                        ).value.custom_fields.vlan_vni_mapping) | default({}) }}"
+                        
+  - name: Check if mapping exists for this Global VLAN
+    set_fact:
+      global_vni_id: "{{ access_vlan_object.vid | string }}"
+
+  # - name: Configure L2VNI VLANs
+  #   cisco.nxos.nxos_vlans:
+  #     config:
+  #       - vlan_id: "{{ item.1.id }}"
+  #         enabled: true
+  #         mapped_vni: "{{ item.1.vni }}"
+  #   loop: "{{ query('netbox.netbox.nb_lookup', 'vlans',
+  #             api_endpoint=netbox_url,
+  #             token=netbox_token,
+  #             api_filter='device='+inventory_hostname+' name__ic=loopback')
+  #             | map(attribute='value') }}"   
+
+  # - name: Configure VRF BGP address families
+  #   cisco.nxos.nxos_bgp_address_family:
+  #     config:
+  #       as_number: "{{ bgp.asn }}"
+  #       address_family:      
+  #         - afi: ipv4
+  #           safi: unicast
+  #           vrf: "{{ item.name }}"
+  #   loop: "{{ vrfs }}"
+
+  # # HAVEN'T UPDATE L3VNI
+  # - name: Configure tenant's VRF
+  #   cisco.nxos.nxos_vrf:
+  #     name: "{{ item.name }}"
+  #     rd: "auto"
+  #     vni: "{{ item.l3_vni.vni }}"
+  #   loop: "{{ query('netbox.netbox.nb_lookup', 'tenants',
+  #             api_endpoint=netbox_url,
+  #             token=netbox_token }}"
