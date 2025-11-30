@@ -6,6 +6,10 @@
     access_vlan_object: "{{ data['untagged_vlan'] }}"
 
   tasks:
+  - name: Debug - Full Raw Payload
+    debug:
+      var: data
+      
   - name: Print the Raw Data Variable
     debug:
       msg:
