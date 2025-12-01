@@ -25,17 +25,17 @@
     debug:
       var: access_vid
 
-  - name: Fetch Device Current Mapping
-    set_fact:
-      current_map: "{{ (query('netbox.netbox.nb_lookup', 'devices',
-                        api_endpoint=netbox_url,
-                        token=netbox_token,
-                        api_filter='name='+inventory_hostname
-                        ).value.custom_fields.vlan_vni_mapping) | default({}) }}"
+  # - name: Fetch Device Current Mapping
+  #   set_fact:
+  #     current_map: "{{ (query('netbox.netbox.nb_lookup', 'devices',
+  #                       api_endpoint=netbox_url,
+  #                       token=netbox_token,
+  #                       api_filter='name='+inventory_hostname
+  #                       ).value.custom_fields.vlan_vni_mapping) | default({}) }}"
                         
-  - name: Check if mapping exists for this Global VLAN
-    set_fact:
-      global_vni_id: "{{ access_vlan_object.vid | string }}"
+  # - name: Check if mapping exists for this Global VLAN
+  #   set_fact:
+  #     global_vni_id: "{{ access_vlan_object.vid | string }}"
 
   # - name: Configure L2VNI VLANs
   #   cisco.nxos.nxos_vlans:
