@@ -6,10 +6,15 @@
   - name: Parse NetBox data into variable
     set_fact:
       parsed_netbox: "{{ netbox | from_json }}"
+      parsed_untagged_vlan: "{{ untagged_vlan | from_json }}"    
 
   - name: Debug the variable access_vid
     debug:
       var: parsed_netbox
+
+  - name: Debug the variable access_vid
+    debug:
+      var: parsed_untagged_vlan
 
   - name: Extract all L2VPN
     set_fact:
