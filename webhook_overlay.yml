@@ -13,6 +13,11 @@
   - name: Parse netbox if it is a JSON string (guarded)
     set_fact:
       netbox_parsed: "{{ netbox | from_json }}"
+      
+  - name: Debug parsed netbox (if parsing succeeded)
+    debug:
+      var: netbox_parsed
+    when: netbox_parsed is defined
 
   - name: Fetch Device Current Mapping
     set_fact:
