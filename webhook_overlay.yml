@@ -7,6 +7,10 @@
     debug:
       var: device_name
 
+  - name: Debug
+    debug:
+      var: netbox
+
   - name: Parse NetBox data into variable
     set_fact:
       parsed_netbox: "{{ netbox | from_json }}"
