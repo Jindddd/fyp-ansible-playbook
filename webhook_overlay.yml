@@ -10,6 +10,14 @@
     debug:
       var: netbox
 
+  - name: Debug netbox type info
+    debug:
+      msg:
+        - "netbox | type_debug = {{ netbox | type_debug }}"
+        - "is string = {{ netbox is string }}"
+        - "is mapping = {{ netbox is mapping }}"
+        - "is sequence = {{ netbox is sequence }}"
+    
   - name: Fetch Device Current Mapping
     set_fact:
       current_map: "{{ (query('netbox.netbox.nb_lookup', 'devices',
