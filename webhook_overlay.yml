@@ -13,6 +13,7 @@
       msg: 
         - "snapshots: {{ snapshots }}"
         - "untagged_vlan: {{ untagged_vlan }}"
+        - "device_name: {{ device_name }}"
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
@@ -41,10 +42,39 @@
       vlan_ids: "{{ untagged_vlan.id }}"
     when: untagged_vlan is defined
 
-  - name: Debug the current_map
-    debug:
-      var: vlan_ids
+  - name: Set prechange VLAN ids
+    set_fact:
+      prechange_vlan_ids: []
     
+  - set_fact:
+      prechange_vlan_ids: "{{ snapshots.prechange.untagged_vlan }}"
+    when: snapshots.prechange.untagged_vlan is defined and (snapshots.prechange.untagged_vlan != 'None')
+
+  - name: Remove unused L2VPNs
+    block:
+    - name: Create list of VLAN IDs to remove
+      set_fact:
+        to_remove: []
+      
+    - set_fact:
+        to_remove: "{{ to_remove + [item] }}"
+      loop: "{{ prechange_vlan_ids | difference(vlan_ids) }}"
+      when: "{{query('netbox.netbox.nb_lookup', 'interfaces',
+                  api_endpoint=netbox_url,
+                  token=netbox_token,
+                  api_filter='device='+device_id+' vlan_id='+(item | string)) | length == 0}}"
+    
+    - name: Filter L2VPNs to be removed based on IDs
+      set_fact:
+        remove_l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', to_remove) | map(attribute='value') }}"     
+    
+    - name: Debug remove_l2vpns
+      debug:
+        msg: "{{ remove_l2vpns }}"
+
+    - name: Debug mappings
+      debug:
+        msg: "{{ mapping }}"  
   # - name: Configure L2VNI VLANs
   #   cisco.nxos.nxos_vlans:
   #     config:
