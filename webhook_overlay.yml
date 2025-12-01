@@ -13,7 +13,7 @@
 
   - name: Debug data
     debug:
-      msg: "Debug data: {{ netbox_parsed['data'] }}"
+      msg: "Debug data: {{ netbox_parsed['data'] | to_nice_json}}"
     when: netbox_parsed is defined
 
   - name: Debug access vlan
