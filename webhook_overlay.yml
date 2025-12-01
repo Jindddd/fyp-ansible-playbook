@@ -11,6 +11,11 @@
       var: netbox_parsed
     when: netbox_parsed is defined
 
+  - name: Debug data
+    debug:
+      msg: "Debug data: {{ netbox_parsed['data'] }}"
+    when: netbox_parsed is defined
+
   - name: Debug access vlan
     set_fact:
       access_vlan: "{{ netbox_parsed['data']['untagged_vlan']['vid'] }}"
