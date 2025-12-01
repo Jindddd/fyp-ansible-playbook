@@ -12,7 +12,7 @@
     when: netbox_parsed is defined
 
   - name: Debug access vlan
-    debug:
+    set_fact:
       access_vlan: "{{ netbox_parsed['data']['untagged_vlan']['vid'] }}"
     when: netbox_parsed['data']['untagged_vlan'] is not none
 
