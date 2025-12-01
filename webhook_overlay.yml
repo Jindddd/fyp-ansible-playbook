@@ -8,7 +8,7 @@
   tasks:
   - name: Debug - Full Raw Payload
     debug:
-      var: data
+      var: netbox
 
   - name: Fetch Device Current Mapping
     set_fact:
