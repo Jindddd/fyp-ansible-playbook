@@ -9,10 +9,6 @@
 
   - name: Debug
     debug:
-      var: "{{ netbox['device_name'] }}"
-
-  - name: Debug
-    debug:
       var: netbox
 
   - name: Parse NetBox data into variable
