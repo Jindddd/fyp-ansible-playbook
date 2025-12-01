@@ -9,7 +9,7 @@
 
   - name: Extract Access VLAN ID
     set_fact:
-      access_vid: "{{ netbox.data.untagged_vlan.vid }}"
+      access_vid: "{{ netbox['data']['untagged_vlan']['vid'] }}"
 
   - name: Debug the variable access_vid
     debug:
