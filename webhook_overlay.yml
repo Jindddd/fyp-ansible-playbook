@@ -9,7 +9,15 @@
   - name: Debug - Full Raw Payload
     debug:
       var: data
-      
+
+  - name: Debug - Event
+    debug:
+      var: event
+  
+  - name: Debug - Timestamp
+    debug:
+      var: timestamp
+
   - name: Print the Raw Data Variable
     debug:
       msg:
