@@ -9,15 +9,11 @@
   - name: Debug - Full Raw Payload
     debug:
       var: netbox
+  
+  - name: Parse netbox if it is a JSON string (guarded)
+    set_fact:
+      netbox_parsed: "{{ netbox | from_json }}"
 
-  - name: Debug netbox type info
-    debug:
-      msg:
-        - "netbox | type_debug = {{ netbox | type_debug }}"
-        - "is string = {{ netbox is string }}"
-        - "is mapping = {{ netbox is mapping }}"
-        - "is sequence = {{ netbox is sequence }}"
-    
   - name: Fetch Device Current Mapping
     set_fact:
       current_map: "{{ (query('netbox.netbox.nb_lookup', 'devices',
