@@ -13,7 +13,7 @@
 
   - name: Extract all L2VPN
     set_fact:
-      all_l2vpn: "{{ parsed_netbox.untagged_vlan.vid }}"
+      all_l2vpn: parsed_netbox['untagged_vlan']['vid']
 
   - name: Debug the variable all_l2vpn
     debug:
