@@ -3,10 +3,6 @@
   gather_facts: false
   
   tasks:
-  - name: Debug device_name
-    debug:
-      var: device_name
-
   - name: Parse NetBox data into variable
     set_fact:
       parsed_netbox: "{{ netbox | from_json }}"
@@ -17,7 +13,7 @@
 
   - name: Extract all L2VPN
     set_fact:
-      all_l2vpn: "{{ parsed_netbox['data']['untagged_vlan']['vid'] }}"
+      all_l2vpn: "{{ parsed_netbox['untagged_vlan']['vid'] }}"
 
   - name: Debug the variable all_l2vpn
     debug:
