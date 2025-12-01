@@ -1,8 +1,12 @@
 - name:  Configure L2VPNs & Server Ports on Leaf switchs (Runs on interface changes)
-  hosts: "{{ netbox['data']['device']['id'] }}"
+  hosts: localhost
   gather_facts: false
   
   tasks:
+  - name: Debug
+    debug:
+      var: data
+
   - name: Parse NetBox data into variable
     set_fact:
       parsed_netbox: "{{ netbox | from_json }}"
@@ -11,13 +15,13 @@
     debug:
       var: parsed_netbox
 
-  - name: Extract Access VLAN ID
+  - name: Extract all L2VPN
     set_fact:
-      access_vid: "{{ parsed_netbox['data']['untagged_vlan']['vid'] }}"
+      all_l2vpn: "{{ parsed_netbox['data']['untagged_vlan']['vid'] }}"
 
-  - name: Debug the variable access_vid
+  - name: Debug the variable all_l2vpn
     debug:
-      var: access_vid
+      var: all_l2vpns
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
