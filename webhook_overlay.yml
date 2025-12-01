@@ -3,21 +3,22 @@
   gather_facts: false
   
   vars:
-    access_vlan_object: "{{ data['untagged_vlan'] }}"
-
-  tasks:
-  - name: Debug - Full Raw Payload
-    debug:
-      var: netbox
+    netbox_parsed: "{{ netbox | from_json }}"
   
-  - name: Parse netbox if it is a JSON string (guarded)
-    set_fact:
-      netbox_parsed: "{{ netbox | from_json }}"
-      
+  tasks:
   - name: Debug parsed netbox (if parsing succeeded)
     debug:
       var: netbox_parsed
     when: netbox_parsed is defined
+
+  - name: Debug access vlan
+    debug:
+      access_vlan: "{{ netbox_parsed['untagged_vlan']['vid'] }}"
+    when: netbox_parsed['untagged_vlan'] is not none
+
+  - name: Debug the variable access_vid
+    debug:
+      var: access_vid
 
   - name: Fetch Device Current Mapping
     set_fact:
