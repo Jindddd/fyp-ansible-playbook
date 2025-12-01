@@ -18,7 +18,7 @@
 
   - name: Debug access vlan
     set_fact:
-      access_vlan: "{{ netbox_parsed['data']['untagged_vlan']['vid'] }}"
+      access_vid: "{{ netbox_parsed['data']['untagged_vlan']['vid'] }}"
     when: netbox_parsed['data']['untagged_vlan'] is not none
 
   - name: Debug the variable access_vid
