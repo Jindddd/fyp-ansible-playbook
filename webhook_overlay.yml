@@ -17,7 +17,7 @@
 
   - name: Debug the variable all_l2vpn
     debug:
-      var: all_l2vpns
+      var: all_l2vpn
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
