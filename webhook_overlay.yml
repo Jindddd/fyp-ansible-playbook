@@ -3,14 +3,14 @@
   gather_facts: false
   
   tasks:
-  - name: Debug netbox
-    debug:
-      var: netbox
+  - name: Parse NetBox data into variable
+    set_fact:
+      parsed_netbox: "{{ netbox | from_json }}"
 
   - name: Extract Access VLAN ID
     set_fact:
-      access_vid: "{{ netbox['data']['untagged_vlan']['vid'] }}"
-
+      access_vid: "{{ parsed_netbox['data']['untagged_vlan']['vid'] }}"
+      
   - name: Debug the variable access_vid
     debug:
       var: access_vid
