@@ -11,8 +11,8 @@
   - name: Debug the variable
     debug:
       msg: 
-        - "snapshots: {{ snapshots }}"
-        - "untagged_vlan: {{ untagged_vlan }}"
+        - "snapshots: {{ snapshots | from_yaml }}"
+        - "untagged_vlan: {{ untagged_vlan | from_yaml }}"
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
