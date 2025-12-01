@@ -3,14 +3,13 @@
   gather_facts: false
   
   vars:
-    netbox_parsed: "{{ netbox | from_json }}"
     access_vid: "{{ netbox['data']['untagged_vlan']['vid'] }}"
   
   tasks:
   - name: Debug netbox
     debug:
       var: netbox
-      
+
   - name: Debug parsed netbox (if parsing succeeded)
     debug:
       var: netbox_parsed
