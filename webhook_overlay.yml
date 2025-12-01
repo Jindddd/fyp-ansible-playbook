@@ -5,7 +5,7 @@
   tasks:
   - name: Debug
     debug:
-      var: data
+      var: device_name
 
   - name: Parse NetBox data into variable
     set_fact:
