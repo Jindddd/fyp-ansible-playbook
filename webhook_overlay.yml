@@ -5,24 +5,14 @@
   tasks:
   - name: Parse NetBox data into variable
     set_fact:
-      parsed_netbox: "{{ netbox | from_json }}"
-      parsed_untagged_vlan: "{{ untagged_vlan | from_yaml }}"    
+      snapshots: "{{ extracted_snapshots | from_yaml }}"
+      untagged_vlan: "{{ extracted_untagged_vlan | from_yaml }}"    
 
-  - name: Debug the variable access_vid
+  - name: Debug the variable
     debug:
-      var: parsed_netbox
-
-  - name: Debug the variable access_vid
-    debug:
-      var: parsed_untagged_vlan
-
-  - name: Extract all L2VPN
-    set_fact:
-      all_l2vpn: "{{ parsed_netbox['untagged_vlan']['vid'] | from_yaml }}"
-
-  - name: Debug the variable all_l2vpn
-    debug:
-      var: all_l2vpn
+      msg: 
+        - "snapshots: {{ snapshots }}"
+        - "untagged_vlan: {{ untagged_vlan }}"
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
