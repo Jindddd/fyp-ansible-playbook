@@ -10,10 +10,20 @@
   - name: Extract Access VLAN ID
     set_fact:
       access_vid: "{{ parsed_netbox['data']['untagged_vlan']['vid'] }}"
-      
+
   - name: Debug the variable access_vid
     debug:
       var: access_vid
+
+  - name: Retrieve all VLAN objects on Netbox
+    set_fact:
+      vlans: "{{ query('netbox.netbox.nb_lookup', 'vlans',
+                    api_endpoint=netbox_url,
+                    token=netbox_token) }}"
+
+  - name: Debug the variable access_vid
+    debug:
+      var: vlans
 
   - name: Fetch Device Current Mapping
     set_fact:
