@@ -11,8 +11,8 @@
   - name: Debug the variable
     debug:
       msg: 
-        - "snapshots: {{ snapshots | from_yaml }}"
-        - "untagged_vlan: {{ untagged_vlan | from_yaml }}"
+        - "snapshots: {{ snapshots }}"
+        - "untagged_vlan: {{ untagged_vlan }}"
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
@@ -36,10 +36,15 @@
     debug:
       var: current_map
 
-  - name: Check if mapping exists for this Global VLAN
+  - name: Retrieve used L2VPNs (VLAN objects on Netbox) from interface
     set_fact:
-      global_vni_id: "{{ access_vlan_object.vid | string }}"
+      vlan_ids: "{{ untagged_vlan.id }}"
+    when: untagged_vlan is defined
 
+  - name: Debug the current_map
+    debug:
+      var: vlan_ids
+    
   # - name: Configure L2VNI VLANs
   #   cisco.nxos.nxos_vlans:
   #     config:
