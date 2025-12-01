@@ -5,7 +5,11 @@
   tasks:
   - name: Debug
     debug:
-      var: netbox.device_name
+      var: device_name
+
+  - name: Debug
+    debug:
+      var: "{{ netbox.device_name }}"
 
   - name: Debug
     debug:
