@@ -5,7 +5,7 @@
   tasks:
   - name: Debug
     debug:
-      var: "{{ netbox | from_json | selectattr('device_name', 'defined') | map(attribute='device_name') | list }}"
+      var: timestamp
 
   - name: Parse NetBox data into variable
     set_fact:
