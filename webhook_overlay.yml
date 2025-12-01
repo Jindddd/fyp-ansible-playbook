@@ -6,7 +6,7 @@
   - name: Parse NetBox data into variable
     set_fact:
       parsed_netbox: "{{ netbox | from_json }}"
-      parsed_untagged_vlan: "{{ untagged_vlan | from_json }}"    
+      parsed_untagged_vlan: "{{ untagged_vlan | from_yaml }}"    
 
   - name: Debug the variable access_vid
     debug:
