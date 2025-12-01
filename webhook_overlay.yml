@@ -2,18 +2,14 @@
   hosts: localhost
   gather_facts: false
   
-  vars:
-    access_vid: "{{ netbox['data']['untagged_vlan']['vid'] }}"
-  
   tasks:
   - name: Debug netbox
     debug:
       var: netbox
 
-  - name: Debug parsed netbox (if parsing succeeded)
-    debug:
-      var: netbox_parsed
-    when: netbox_parsed is defined
+  - name: Extract Access VLAN ID
+    set_fact:
+      access_vid: "{{ netbox['data']['untagged_vlan']['vid'] }}"
 
   - name: Debug the variable access_vid
     debug:
