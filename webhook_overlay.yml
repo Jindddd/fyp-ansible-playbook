@@ -5,7 +5,7 @@
   tasks:
   - name: Debug
     debug:
-      var: device_name
+      var: netbox.device_name
 
   - name: Debug
     debug:
