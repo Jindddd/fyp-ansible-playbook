@@ -7,6 +7,10 @@
     set_fact:
       parsed_netbox: "{{ netbox | from_json }}"
 
+  - name: Debug the variable access_vid
+    debug:
+      var: parsed_netbox
+
   - name: Extract Access VLAN ID
     set_fact:
       access_vid: "{{ parsed_netbox['data']['untagged_vlan']['vid'] }}"
@@ -21,7 +25,7 @@
                     api_endpoint=netbox_url,
                     token=netbox_token) }}"
 
-  - name: Debug the variable access_vid
+  - name: Debug the variable vlans
     debug:
       var: vlans
 
@@ -32,7 +36,11 @@
                         token=netbox_token,
                         api_filter='name='+inventory_hostname
                         ).value.custom_fields.vlan_vni_mapping) | default({}) }}"
-                        
+
+  - name: Debug the current_map
+    debug:
+      var: current_map
+
   - name: Check if mapping exists for this Global VLAN
     set_fact:
       global_vni_id: "{{ access_vlan_object.vid | string }}"
