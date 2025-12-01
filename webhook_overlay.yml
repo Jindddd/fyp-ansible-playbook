@@ -1,5 +1,5 @@
 - name:  Configure L2VPNs & Server Ports on Leaf switchs (Runs on interface changes)
-  hosts: localhost
+  hosts: "{{ netbox['data']['device']['id'] }}"
   gather_facts: false
   
   tasks:
