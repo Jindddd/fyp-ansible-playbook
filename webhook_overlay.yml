@@ -1,5 +1,5 @@
 - name:  Configure L2VPNs & Server Ports on Leaf switchs (Runs on interface changes)
-  hosts: localhost
+  hosts: "{{ device_name }}"
   gather_facts: false
   
   tasks:
@@ -43,7 +43,7 @@
 
   - name: Retrieve used L2VPNs (VLAN objects on Netbox) from interface
     set_fact:
-      vlan_ids: "{{ untagged_vlan.id }}"
+      vlan_ids: "{{ [untagged_vlan.id] }}"
     when: untagged_vlan is defined
 
   - name: Set prechange VLAN ids
