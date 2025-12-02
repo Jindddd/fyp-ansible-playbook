@@ -234,12 +234,6 @@
           ip_forward: true
     loop: "{{ l3vpns }}"
 
-  - name: Create VTEP
-    cisco.nxos.nxos_interfaces:
-      config:
-        - name: "nve1"
-          enabled: true
-
   - name: Add L3VNIs to VTEP
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: nve1
@@ -302,8 +296,8 @@
       config:
         - name: "vlan {{ map[item.custom_fields.vni | string] }}"
           ipv4:
-          - address: "{{ (ip_prefix | ansible.netcommon.ipaddr('first_usable')) ~ '/' ~
-                  (ip_prefix | ansible.netcommon.ipaddr('prefix')) }}"
+          - address: "{{ (ip_prefix | ansible.utils.ipaddr('first_usable')) ~ '/' ~
+                  (ip_prefix | ansible.utils.ipaddr('prefix')) }}"
     vars:
       ip_prefix: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
                       api_endpoint=netbox_url,
