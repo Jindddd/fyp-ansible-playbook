@@ -132,7 +132,7 @@
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='slug='+item
-                    ) | map(attribute='value') | list) }}"
+                    ) | map(attribute='value') | list }}"
     loop: "{{ used_tenants }}"
 
   - name: Debug the tenants
@@ -149,7 +149,7 @@
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='id='+custom_fields.tenant_l3vni.id
-                    ) | map(attribute='value') | list) }}"
+                    ) | map(attribute='value') | list }}"
     loop: "{{ tenants }}"
 
   - name: Debug the l3vpns
