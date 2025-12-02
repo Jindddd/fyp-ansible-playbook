@@ -296,19 +296,23 @@
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='vlan_id=' ~ 3) }}"
-
+  
   - name: Configure L2VNI - ip address
     cisco.nxos.nxos_l3_interfaces:
       config:
         - name: "vlan {{ map[item.custom_fields.vni | string] }}"
           ipv4:
-          - address: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
-                    api_endpoint=netbox_url,
-                    token=netbox_token,
-                    api_filter='vlan_id=' ~ item.id)
-                    | map(attribute='value')
-                    | map(attribute='prefix') 
-                    | ansible.utils.ipaddr('first_usable') | first }}"
+          - address: >-
+              "{{ ip_prefix | ansible.netcommon.ipaddr('first_usable')) ~ '/' ~
+                  (ip_prefix | ansible.netcommon.ipaddr('prefix')) }}"
+    vars:
+      ip_prefix: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
+                      api_endpoint=netbox_url,
+                      token=netbox_token,
+                      api_filter='vlan_id=' ~ item.id)
+                      | map(attribute='value')
+                      | map(attribute='prefix') 
+                      | first }}"
     loop: "{{ l2vpns }}"
     
   - name: Enable anycast gateway on L2VNIs SVIs
