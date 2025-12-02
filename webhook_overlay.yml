@@ -52,7 +52,9 @@
   - name: Retrieve used L2VPNs (VLAN objects on Netbox) from interface
     set_fact:
       vlan_ids: "{{ [untagged_vlan.id] }}"
-    when: untagged_vlan is defined
+    when:
+      - untagged_vlan is defined
+      - untagged_vlan != 'None'
 
   - name: Set prechange VLAN ids
     set_fact:
