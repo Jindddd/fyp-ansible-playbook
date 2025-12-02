@@ -39,7 +39,7 @@
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='name='+device_name
-                    ).custom_fields.vlan_vni_mapping | map(attribute='value') | default({})) | dict2items }}"
+                    ) | map(attribute='value')).custom_fields.vlan_vni_mapping  | default({})) | dict2items }}"
 
   - name: Debug the variables
     debug:
