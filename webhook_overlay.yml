@@ -290,7 +290,7 @@
       interface: "vlan {{ map[item.custom_fields.vni | string] }}"
     loop: "{{ l2vpns }}"
 
-  - name: Debug the l3vpns
+  - name: Debug the prefixes for VLAN ID 3
     debug:
       msg: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
                     api_endpoint=netbox_url,
@@ -305,8 +305,10 @@
           - address: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
                     api_endpoint=netbox_url,
                     token=netbox_token,
-                    api_filter='vlan_id=' ~ item.id
-                    ) | map(attribute='prefix') | ansible.netcommon.ipaddr('first_usable') }}"
+                    api_filter='vlan_id=' ~ item.id)
+                    | map(attribute='value')
+                    | map(attribute='prefix') 
+                    | ansible.netcommon.ipaddr('first_usable') }}"
     loop: "{{ l2vpns }}"
     
   - name: Enable anycast gateway on L2VNIs SVIs
