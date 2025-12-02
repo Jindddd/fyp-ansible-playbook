@@ -73,7 +73,7 @@
   loop: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
             api_endpoint=netbox_url,
             token=netbox_token,
-            api_filter='device='+inventory_hostname+' enabled=true')
+            api_filter='device='+inventory_hostname+' enabled=true tag=underlay')
             | map(attribute='value') }}"
 
 - name: Enable BGP
