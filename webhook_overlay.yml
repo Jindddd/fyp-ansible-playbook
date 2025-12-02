@@ -128,7 +128,7 @@
       tenants: []
 
   - set_fact:
-      tenants: "{{ tenants + lookup('netbox.netbox.nb_lookup', 'tenants',
+      tenants: "{{ tenants + query('netbox.netbox.nb_lookup', 'tenants',
                     api_endpoint=netbox_url,
                     api_filter=('slug='+item),
                     token=netbox_token) }}"
@@ -140,7 +140,7 @@
     
   - name: Populate L3VNI VLANs list
     set_fact:
-      l3vpns: "{{ l3vpns + lookup('netbox.netbox.nb_lookup', 'vlans',
+      l3vpns: "{{ l3vpns + query('netbox.netbox.nb_lookup', 'vlans',
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='id='+item.custom_fields.tenant_l3vni.id) }}"
