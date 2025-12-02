@@ -27,11 +27,11 @@
 
   - name: Retrieve existing VNI-VLAN ID mapping from Device object
     set_fact:
-      mapping: "{{ (lookup('netbox.netbox.nb_lookup', 'devices',
+      mapping: "{{ (query('netbox.netbox.nb_lookup', 'devices',
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='name='+device_name
-                    ).value.custom_fields.vlan_vni_mapping) | dict2items | default({}) }}"
+                    ) | first ).custom_fields.vlan_vni_mapping) | dict2items }}"
 
   - name: Debug the variables
     debug:
