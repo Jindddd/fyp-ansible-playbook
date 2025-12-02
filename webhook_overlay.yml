@@ -148,7 +148,7 @@
       l3vpns: "{{ l3vpns + query('netbox.netbox.nb_lookup', 'vlans',
                     api_endpoint=netbox_url,
                     token=netbox_token,
-                    api_filter='id='+custom_fields.tenant_l3vni.id
+                    api_filter='id='+item.custom_fields.tenant_l3vni.id
                     ) | map(attribute='value') | list }}"
     loop: "{{ tenants }}"
 
