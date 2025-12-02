@@ -197,7 +197,7 @@
     cisco.nxos.nxos_vlans:
       config:
         - vlan_id: "{{ map[item.custom_fields.vni | string] }}"
-          name: "{{ item.name }}"
+          name: "{{ item.name | replace(' ', '_') }}"
           enabled: true
           mapped_vni: "{{ item.custom_fields.vni }}"
     loop: "{{ l3vpns }}"
@@ -253,7 +253,7 @@
     cisco.nxos.nxos_vlans:
       config:
         - vlan_id: "{{ map[item.custom_fields.vni | string] }}"
-          name: "{{ item.name }}"
+          name: "{{ item.name | replace(' ', '_') }}"
           enabled: true
           mapped_vni: "{{ item.custom_fields.vni }}"
     loop: "{{ l2vpns }}"
