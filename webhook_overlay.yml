@@ -47,7 +47,7 @@
     debug:
       msg:
         - "all_l2vpns: {{ all_l2vpns }}"
-        - "mapping: {{ mapping }}"
+        - "vlan_ids: {{ vlan_ids }}"
 
   - name: Retrieve used L2VPNs (VLAN objects on Netbox) from interface
     set_fact:
@@ -63,6 +63,12 @@
   - set_fact:
       prechange_vlan_ids: "{{ snapshots.prechange.untagged_vlan }}"
     when: snapshots.prechange.untagged_vlan is defined and (snapshots.prechange.untagged_vlan != 'None')
+
+  - name: Debug the variables
+    debug:
+      msg:
+        - "prechange_vlan_ids: {{ prechange_vlan_ids }}"
+        - "mapping: {{ mapping }}"
 
 # The vlan_id here is ID of the VLAN not VLAN number!
   - name: Remove unused L2VPNs
