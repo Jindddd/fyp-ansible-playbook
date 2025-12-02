@@ -302,8 +302,7 @@
       config:
         - name: "vlan {{ map[item.custom_fields.vni | string] }}"
           ipv4:
-          - address: >-
-              "{{ (ip_prefix | ansible.netcommon.ipaddr('first_usable')) ~ '/' ~
+          - address: "{{ (ip_prefix | ansible.netcommon.ipaddr('first_usable')) ~ '/' ~
                   (ip_prefix | ansible.netcommon.ipaddr('prefix')) }}"
     vars:
       ip_prefix: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
