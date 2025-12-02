@@ -148,7 +148,7 @@
       l3vpns: "{{ l3vpns + lookup('netbox.netbox.nb_lookup', 'vlans',
                     api_endpoint=netbox_url,
                     token=netbox_token,
-                    api_filter='id='+item.value.custom_fields.tenant_l3vni.id) }}"
+                    api_filter='id='+item.custom_fields.tenant_l3vni.id) }}"
     loop: "{{ tenants }}"
 
   - name: Update VNI-VLAN ID mapping if needed
@@ -235,7 +235,7 @@
   - name: Add L3VNIs to VTEP
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: nve1
-      vni: "{{ item_custom_fields.vni }}"
+      vni: "{{ item.custom_fields.vni }}"
       assoc_vrf: true
     loop: "{{ l3vpns }}"
 
