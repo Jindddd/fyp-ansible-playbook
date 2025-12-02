@@ -308,7 +308,7 @@
                     api_filter='vlan_id=' ~ item.id)
                     | map(attribute='value')
                     | map(attribute='prefix') 
-                    | ansible.netcommon.ipaddr('first_usable') }}"
+                    | ansible.utils.ipaddr('first_usable') | first }}"
     loop: "{{ l2vpns }}"
     
   - name: Enable anycast gateway on L2VNIs SVIs
