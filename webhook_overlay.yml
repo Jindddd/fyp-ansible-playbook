@@ -134,6 +134,10 @@
                     token=netbox_token) }}"
     loop: "{{ used_tenants }}"
 
+  - name: Debug the variables
+    debug:
+      var: tenants
+
   - name: Retrieve L3VNI VLAN objects for these Tenants
     set_fact:
       l3vpns: []
