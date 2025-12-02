@@ -25,13 +25,21 @@
                     api_endpoint=netbox_url,
                     token=netbox_token) }}"
 
+  - name: Debug the mapping query
+    debug:
+      msg:
+        - "{{ (query('netbox.netbox.nb_lookup', 'devices',
+                      api_endpoint=netbox_url,
+                      token=netbox_token,
+                      api_filter='name='+device_name)) }}"
+
   - name: Retrieve existing VNI-VLAN ID mapping from Device object
     set_fact:
       mapping: "{{ ((query('netbox.netbox.nb_lookup', 'devices',
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='name='+device_name
-                    ) | first ).custom_fields.vlan_vni_mapping | default({})) | dict2items }}"
+                    ).custom_fields.vlan_vni_mapping | default({})) | dict2items }}"
 
   - name: Debug the variables
     debug:
