@@ -133,15 +133,27 @@
       tenants: []
 
   - set_fact:
-      tenants: "{{ tenants + [lookup('netbox.netbox.nb_lookup', 'tenants',
+      tenants: "{{ tenants + lookup('netbox.netbox.nb_lookup', 'tenants',
                     api_endpoint=netbox_url,
                     api_filter=('slug='+item),
-                    token=netbox_token)]}}"
+                    token=netbox_token) }}"
     loop: "{{ used_tenants }}"
+
+  - name: Retrieve L3VNI VLAN objects for these Tenants
+    set_fact:
+      l3vpns: []
+    
+  - name: Populate L3VNI VLANs list
+    set_fact:
+      l3vpns: "{{ l3vpns + lookup('netbox.netbox.nb_lookup', 'vlans',
+                    api_endpoint=netbox_url,
+                    token=netbox_token,
+                    api_filter='id='+item.value.custom_fields.tenant_l3vni.id) }}"
+    loop: "{{ tenants }}"
 
   - name: Update VNI-VLAN ID mapping if needed
     set_fact:
-      vnis: "{{ (l2vpns | map(attribute='custom_fields.vni')) + (tenants | map(attribute='value.custom_fields.vni')) }}"
+      vnis: "{{ (l2vpns | map(attribute='custom_fields.vni')) + (l3vpns | map(attribute='custom_fields.vni')) }}"
       mapped_vnis: "{{ mapping | map(attribute='key') }}"
 
   - set_fact:
@@ -172,31 +184,23 @@
 
   - name: Create VRFs
     cisco.nxos.nxos_vrf:
-      name: "{{ item.value.slug }}"
-      vni: "{{ [lookup('netbox.netbox.nb_lookup', 'vlans',
-                    api_endpoint=netbox_url,
-                    token=netbox_token,
-                    api_filter=('id='+item.custom_fields.tenant_l3vni.id)
-                    )] | map(attribute='value.custom_fields.vni') | first }}"
+      name: "{{ item.tenant.slug }}"
+      vni: "{{ item.custom_fields.vni }}"
       rd: auto
-    loop: "{{ tenants }}"
+    loop: "{{ l3vpns }}"
 
   - name: Create L3VNI VLANs
     cisco.nxos.nxos_vlans:
       config:
-        - vlan_id: "{{ map[item.value.custom_fields.tenant_l3vni.vid | string] }}"
-          name: "{{ item.value.custom_fields.tenant_l3vni.name }}"
+        - vlan_id: "{{ map[item.custom_fields.vni | string] }}"
+          name: "{{ item.name }}"
           enabled: true
-          mapped_vni: "{{ [lookup('netbox.netbox.nb_lookup', 'vlans',
-                    api_endpoint=netbox_url,
-                    token=netbox_token,
-                    api_filter=('id='+item.custom_fields.tenant_l3vni.id)
-                    )] | map(attribute='value.custom_fields.vni') | first }}"
-    loop: "{{ tenants }}"
+          mapped_vni: "{{ item.custom_fields.vni }}"
+    loop: "{{ l3vpns }}"
 
   - name: Configure VRFs address-family
     cisco.nxos.nxos_vrf_af:
-      vrf: "{{ item.value.slug }}"
+      vrf: "{{ item.slug }}"
       afi: ipv4
       route_target_both_auto_evpn: true
       route_targets:
@@ -211,16 +215,16 @@
         address_family:      
           - afi: ipv4
             safi: unicast
-            vrf: "{{ item.value.slug }}"
+            vrf: "{{ item.slug }}"
     loop: "{{ tenants }}"
 
   - name: Create L3VNIs SVIs
     cisco.nxos.nxos_interfaces:
       config:
-        - name: "Vlan {{ map[item.value.custom_fields.tenant_l3vni.vid | string] }}"
+        - name: "Vlan {{ map[item.custom_fields.vni | string] }}"
           enabled: true
           ip_forward: true
-    loop: "{{ tenants }}"
+    loop: "{{ l3vpns }}"
 
   - name: Create VTEP
     cisco.nxos.nxos_interfaces:
@@ -231,19 +235,15 @@
   - name: Add L3VNIs to VTEP
     cisco.nxos.nxos_vxlan_vtep_vni:
       interface: nve1
-      vni: "{{ [lookup('netbox.netbox.nb_lookup', 'vlans',
-                    api_endpoint=netbox_url,
-                    token=netbox_token,
-                    api_filter=('id='+item.custom_fields.tenant_l3vni.id)
-                    )] | map(attribute='value.custom_fields.vni') | first }}"
+      vni: "{{ item_custom_fields.vni }}"
       assoc_vrf: true
-    loop: "{{ tenants }}"
-      
+    loop: "{{ l3vpns }}"
+
   - name: Add L3VNIs SVIs to respective VRFs
     cisco.nxos.nxos_vrf_interface:
-      vrf: "{{ item.value.slug }}"
-      interface: "vlan {{ map[item.value.custom_fields.tenant_l3vni.vid | string] }}"
-    loop: "{{ tenants }}"
+      vrf: "{{ item.tenant.slug }}"
+      interface: "vlan {{ map[item.custom_fields.vni | string] }}"
+    loop: "{{ l3vpns }}"
     
   - name: Create L2VNI VLANs
     cisco.nxos.nxos_vlans:
@@ -279,7 +279,7 @@
   - name: Enable anycast gateway on L2VNIs SVIs
     cisco.nxos.nxos_interfaces:
       config:
-        - name:  "vlan {{ map[item.vid | string] }}"
+        - name:  "vlan {{ map[item.custom_fields.vni | string] }}"
           fabric_forwarding_anycast_gateway: true
     loop: "{{ l2vpns }}"
 
@@ -302,7 +302,7 @@
         - name: "{{ interface_name }}"
           mode: access
           access:
-            vlan: "{{ map[l2vpns[0].custom_fields.vid | string] }}"
+            vlan: "{{ map[l2vpns[0].custom_fields.vni | string] }}"
       state: replaced
     when: switchport_mode == 'access' and untagged_vlan.vid is defined
 
