@@ -119,6 +119,10 @@
     set_fact:
       l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', vlan_ids) | map(attribute='value') }}"
   
+  - name: Debug the l2vpns
+    debug:
+      var: l2vpns
+
   - name: Create list of used tenants
     set_fact:
       used_tenants: "{{ l2vpns | map(attribute='tenant.slug') | unique }}"
@@ -280,6 +284,31 @@
       route_target_both: auto
     loop: "{{ l2vpns }}"
   
+  - name: Add L2VNIs SVIs to respective VRFs
+    cisco.nxos.nxos_vrf_interface:
+      vrf: "{{ item.tenant.slug }}"
+      interface: "vlan {{ map[item.custom_fields.vni | string] }}"
+    loop: "{{ l2vpns }}"
+
+  - name: Debug the l3vpns
+    debug:
+      msg: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
+                    api_endpoint=netbox_url,
+                    token=netbox_token,
+                    api_filter='vlan_id=' ~ 3) }}"
+
+  - name: Configure L2VNI - ip address
+    cisco.nxos.nxos_l3_interfaces:
+      config:
+        - name: "vlan {{ map[item.custom_fields.vni | string] }}"
+          ipv4:
+          - address: "{{ query('netbox.netbox.nb_lookup', 'prefixes',
+                    api_endpoint=netbox_url,
+                    token=netbox_token,
+                    api_filter='vlan_id=' ~ item.id
+                    ) | map(attribute='prefix') | ansible.netcommon.ipaddr('first_usable') }}"
+    loop: "{{ l2vpns }}"
+    
   - name: Enable anycast gateway on L2VNIs SVIs
     cisco.nxos.nxos_interfaces:
       config:
