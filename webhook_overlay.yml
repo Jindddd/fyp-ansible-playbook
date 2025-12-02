@@ -16,7 +16,8 @@
         - "device_name: {{ device_name }}"
         - "description: {{ description }}"
         - "enabled: {{ enabled }}"
-        - "interface_name: {{ interface_name }}"        
+        - "interface_name: {{ interface_name }}"
+        - "switchport_mode: {{ switchport_mode }}"
 
   - name: Retrieve all VLAN objects on Netbox
     set_fact:
