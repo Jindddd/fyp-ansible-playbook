@@ -8,7 +8,7 @@
       snapshots: "{{ extracted_snapshots | from_yaml }}"
       untagged_vlan: "{{ extracted_untagged_vlan | from_yaml }}"    
 
-  - name: Debug the variable
+  - name: Debug the variables
     debug:
       msg: 
         - "snapshots: {{ snapshots }}"
@@ -19,27 +19,25 @@
         - "interface_name: {{ interface_name }}"
         - "switchport_mode: {{ switchport_mode }}"
 
-  - name: Retrieve all VLAN objects on Netbox
+  - name: Retrieve all L2VPNs (VLAN objects on Netbox)
     set_fact:
       all_l2vpns: "{{ query('netbox.netbox.nb_lookup', 'vlans',
                     api_endpoint=netbox_url,
                     token=netbox_token) }}"
 
-  - name: Debug the variable l2vpns
-    debug:
-      var: all_l2vpns
-
-  - name: Fetch Device Current Mapping
+  - name: Retrieve existing VNI-VLAN ID mapping from Device object
     set_fact:
-      current_map: "{{ (query('netbox.netbox.nb_lookup', 'devices',
-                        api_endpoint=netbox_url,
-                        token=netbox_token,
-                        api_filter='name='+inventory_hostname
-                        ).value.custom_fields.vlan_vni_mapping) | default({}) }}"
+      mapping: "{{ (lookup('netbox.netbox.nb_lookup', 'devices',
+                    api_endpoint=netbox_url,
+                    token=netbox_token,
+                    api_filter='name='+device_name
+                    ).value.custom_fields.vlan_vni_mapping) | dict2items }}"
 
-  - name: Debug the current_map
+  - name: Debug the variables
     debug:
-      var: current_map
+      msg:
+        - "all_l2vpns: {{ all_l2vpns }}"
+        - "mapping: {{ mapping }}"
 
   - name: Retrieve used L2VPNs (VLAN objects on Netbox) from interface
     set_fact:
@@ -76,10 +74,6 @@
     - name: Debug remove_l2vpns
       debug:
         msg: "{{ remove_l2vpns }}"
-
-    - name: Debug mappings
-      debug:
-        msg: "{{ mapping }}"
 
     - name: Convert mapping to o_map
       set_fact:
