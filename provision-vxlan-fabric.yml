@@ -33,7 +33,7 @@
   gather_facts: false
   roles:
     - overlay_leaf_config
-    
+
   pre_tasks:
     - name: Debug effective variables from group_vars
       debug:

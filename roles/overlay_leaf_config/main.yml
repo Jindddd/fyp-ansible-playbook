@@ -1,5 +1,9 @@
 # The base configuration for overlay leaf switches
 # The rest of configuration is done in webhook_overlay.yml which triggered by NetBox
+- name: Debug
+  debug:
+    msg: "Overlay leaf configuration applied."
+    
 - name: Create VTEP
   cisco.nxos.nxos_interfaces:
     config:
@@ -13,6 +17,3 @@
     source_interface: "loopback0"
     shutdown: false
 
-- name: Debug
-  debug:
-    msg: "Overlay leaf configuration applied."
