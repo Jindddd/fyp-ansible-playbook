@@ -27,3 +27,9 @@
   gather_facts: false
   roles:
     - underlay_leaf_config
+    
+- name: Configure Overlay Network on Leafs
+  hosts: device_roles_leaf-switch 
+  gather_facts: false
+  roles:
+    - overlay_leaf_config
