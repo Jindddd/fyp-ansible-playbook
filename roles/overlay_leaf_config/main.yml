@@ -12,3 +12,7 @@
     host_reachability: true
     source_interface: "loopback0"
     shutdown: false
+
+- name: Debug
+  debug:
+    msg: "Overlay leaf configuration applied."
