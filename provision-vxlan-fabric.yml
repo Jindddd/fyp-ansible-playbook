@@ -1,35 +1,35 @@
-- name: Apply Base Configuration to all devices
-  hosts: 
-    - device_roles_leaf-switch
-    - device_roles_spine-switch
-  gather_facts: false
-  roles:
-    - base_config
+# - name: Apply Base Configuration to all devices
+#   hosts: 
+#     - device_roles_leaf-switch
+#     - device_roles_spine-switch
+#   gather_facts: false
+#   roles:
+#     - base_config
 
-- name: Configure Underlay Network on Spines
-  hosts: device_roles_spine-switch
-  gather_facts: false
-  roles:
-    - underlay_spine_config
+# - name: Configure Underlay Network on Spines
+#   hosts: device_roles_spine-switch
+#   gather_facts: false
+#   roles:
+#     - underlay_spine_config
   
-  # pre_tasks:
-  #   - name: Debug effective variables from group_vars
-  #     debug:
-  #       msg:
-  #         - "inventory_hostname: {{ inventory_hostname }}"
-  #         - "ospf: {{ ospf | default('undefined') }}"
-  #         - "bgp.asn: {{ bgp.asn | default('undefined') }}"
-  #         - "default_gateway: {{ default_gateway | default('undefined') }}"
-  #         - "netbox_url: {{ netbox_url | default('undefined') }}"
+#   # pre_tasks:
+#   #   - name: Debug effective variables from group_vars
+#   #     debug:
+#   #       msg:
+#   #         - "inventory_hostname: {{ inventory_hostname }}"
+#   #         - "ospf: {{ ospf | default('undefined') }}"
+#   #         - "bgp.asn: {{ bgp.asn | default('undefined') }}"
+#   #         - "default_gateway: {{ default_gateway | default('undefined') }}"
+#   #         - "netbox_url: {{ netbox_url | default('undefined') }}"
 
-- name: Configure Underlay Network on Leafs
-  hosts: device_roles_leaf-switch 
-  gather_facts: false
-  roles:
-    - underlay_leaf_config
+# - name: Configure Underlay Network on Leafs
+#   hosts: device_roles_leaf-switch 
+#   gather_facts: false
+#   roles:
+#     - underlay_leaf_config
     
 - name: Configure Overlay Network on Leafs
-  hosts: device_roles_leaf-switch 
+  hosts: device_roles_leaf-switch
   gather_facts: false
   roles:
     - overlay_leaf_config
