@@ -1,3 +1,7 @@
+- name: Debug features
+  debug:
+    msg: "Features to enable: {{ features }}"
+
 - name: Enable NX-OS features
   cisco.nxos.nxos_feature:
     feature: "{{ item }}"
