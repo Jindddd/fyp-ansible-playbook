@@ -128,12 +128,10 @@
               safi: unicast
               send_community:
                 both: true
-              route_reflector_client: true
             - afi: l2vpn
               safi: evpn
               send_community:
                 both: true
-              route_reflector_client: true
   loop: "{{ (query('netbox.netbox.nb_lookup', 'ip-addresses',
               api_endpoint=netbox_url,
               token=netbox_token,
