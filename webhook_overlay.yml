@@ -247,7 +247,6 @@
       config:
         - name: "Vlan {{ map[item.custom_fields.vni | string] }}"
           enabled: true
-          ip_forward: true
     loop: "{{ l3vpns }}"
 
   - name: Add L3VNIs to VTEP
@@ -263,6 +262,14 @@
       interface: "vlan {{ map[item.custom_fields.vni | string] }}"
     loop: "{{ l3vpns }}"
     
+  # Need to enable ip forwarding after adding to VRF to prevent loss of config
+  - name: Enable IP Forwarding on L3VNI SVIs
+    cisco.nxos.nxos_interfaces:
+      config:
+        - name: "Vlan {{ map[item.custom_fields.vni | string] }}"
+          ip_forward: true
+    loop: "{{ l3vpns }}"
+
   - name: Create L2VNI VLANs
     cisco.nxos.nxos_vlans:
       config:
