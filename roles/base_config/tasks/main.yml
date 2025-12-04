@@ -1,7 +1,3 @@
-- name: Debug features
-  debug:
-    msg: "Features to enable: {{ features }}"
-
 - name: Enable NX-OS features
   cisco.nxos.nxos_feature:
     feature: "{{ item }}"
@@ -10,10 +6,6 @@
 - name: Enable EVPN overlay
   cisco.nxos.nxos_evpn_global:
     nv_overlay_evpn: true
-
-- name: Debug system MTUI
-  debug:
-    msg: "System MTU is set to {{ system_mtu }}"
 
 - name: Set system MTU
   cisco.nxos.nxos_system:
