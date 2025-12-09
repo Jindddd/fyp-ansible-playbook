@@ -233,7 +233,7 @@
           direction: both
     loop: "{{ tenants }}"
   
-  - name: Configure VRF BGP address families
+  - name: Configure VRF BGP address families with redistribution
     cisco.nxos.nxos_bgp_address_family:
       config:
         as_number: "{{ bgp.asn }}"
@@ -241,6 +241,9 @@
           - afi: ipv4
             safi: unicast
             vrf: "{{ item.slug }}"
+            redistribute:
+                - protocol: direct
+                  route_map: PERMIT_ALL
     loop: "{{ tenants }}"
 
   - name: Create L3VNIs SVIs

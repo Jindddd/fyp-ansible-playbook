@@ -29,6 +29,14 @@
     anycast_gateway_mac: "{{ anycast_gateway_mac }}"
   when: inventory_hostname in groups['device_roles_leaf-switch']
 
+- name: Create Permit All Route Map
+  cisco.nxos.nxos_route_maps:
+    config:
+      - route_map: PERMIT_ALL
+        entries:
+          - sequence: 10
+            action: permit
+
 # - name: Debug device role and inventory groups
 #   debug:
 #     msg:
