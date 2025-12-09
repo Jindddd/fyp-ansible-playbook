@@ -32,8 +32,8 @@
                       api_endpoint=netbox_url,
                       token=netbox_token,
                       api_filter='name='+device_name
-                      ).value.custom_fields.vlan_vni_mapping) | default({})
-                      )| dict2items }}"
+                      ).value.custom_fields.vlan_vni_mapping) | default({}, true)
+                      ) | dict2items }}"
 
   - name: Retrieve existing VNI-VLAN ID mapping from Device object
     set_fact:
@@ -41,7 +41,7 @@
                     api_endpoint=netbox_url,
                     token=netbox_token,
                     api_filter='name='+device_name
-                    ).value.custom_fields.vlan_vni_mapping) | default({})
+                    ).value.custom_fields.vlan_vni_mapping) | default({}, true)
                     ) | dict2items }}"
 
   - name: Debug the variables
