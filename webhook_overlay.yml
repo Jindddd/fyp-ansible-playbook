@@ -103,13 +103,12 @@
     - debug:
         var: o_map
 
-    - debug:
-        msg: "{{ o_map[item.custom_fields.vni | string] }}"
-      loop: "{{ remove_l2vpns }}"
-
     - name: Identify potentially unused Tenants
       set_fact:
         candidate_tenants: "{{ remove_l2vpns | map(attribute='tenant') | unique }}"
+
+    - debug:
+        var: candidate_tenants
 
     # TESTING REMOVING L3VNI VLANs AND VRFS
     # 1. Fetch ALL interfaces on this specific device to audit current usage
@@ -131,6 +130,9 @@
                                    | unique 
                                    | list }}"
 
+    - debug:
+        var: current_used_vlan_ids
+
     # 3. Fetch the full VLAN objects for these 'Used IDs'
     #    (We do this to get the 'tenant' field, which was missing in the interface API)
     - name: Fetch details of currently used VLANs to identify their Tenants
@@ -141,6 +143,9 @@
                                         token=netbox_token,
                                         api_filter='id__in=' ~ (current_used_vlan_ids | join(','))) }}"
       when: current_used_vlan_ids | length > 0
+
+    - debug:
+        var: current_used_vlans_objects
 
     - name: Handle empty case
       set_fact:
@@ -158,6 +163,9 @@
       set_fact:
         tenants_to_remove: "{{ candidate_tenants | rejectattr('id', 'in', active_tenant_ids) | list }}"
 
+    - debug:
+        var: tenants_to_remove
+
     # 6. Proceed with Removal (Same logic as before)
     - name: Process Removal of Unused Tenants
       block:
@@ -167,7 +175,7 @@
             remove_l3vpns: "{{ query('netbox.netbox.nb_lookup', 'vlans',
                                 api_endpoint=netbox_url,
                                 token=netbox_token,
-                                api_filter='id=' ~ item.custom_fields.tenant_l3vni.id) }}"
+                                api_filter='id=' ~ item.custom_fields.vni) }}"
           loop: "{{ tenants_to_remove }}"
           register: l3vni_results
 
