@@ -119,6 +119,9 @@
                                   token=netbox_token,
                                   api_filter='device=' ~ device_name) }}"
 
+    - debug:
+        var: all_device_interfaces
+
     # 2. Extract the IDs of ALL VLANs currently assigned to these interfaces
     - name: Build list of VLAN IDs currently in use on this device
       set_fact:
@@ -166,30 +169,51 @@
     - debug:
         var: tenants_to_remove
 
-    # 6. Proceed with Removal (Same logic as before)
+# 6. Proceed with Removal
     - name: Process Removal of Unused Tenants
       block:
-        # A. Get L3VNI Info for these specific tenants
+        # ---------------------------------------------------------------------
+        # FIX: Re-fetch FULL Tenant objects to get custom_fields
+        # ---------------------------------------------------------------------
+        - name: Fetch full Tenant objects (to access custom_fields)
+          set_fact:
+            tenants_to_remove_full: "{{ query('netbox.netbox.nb_lookup', 'tenants',
+                                        api_endpoint=netbox_url,
+                                        token=netbox_token,
+                                        api_filter='id__in=' ~ (tenants_to_remove | map(attribute='id') | join(',')) ) }}"
+
+        - debug:
+            var: tenants_to_remove_full
+        # ---------------------------------------------------------------------
+        # A. Get L3VNI Info using the FULL objects
+        # ---------------------------------------------------------------------
         - name: Retrieve L3VNI VLAN Objects for removal
           set_fact:
+            # IMPORTANT: Ensure 'tenant_l3vni' is the correct field name in your NetBox.
+            # Your error snippet used 'vni', but your previous code used 'tenant_l3vni.id'.
+            # I am assuming 'tenant_l3vni' is the custom field holding the VLAN Object.
             remove_l3vpns: "{{ query('netbox.netbox.nb_lookup', 'vlans',
                                 api_endpoint=netbox_url,
                                 token=netbox_token,
-                                api_filter='id=' ~ item.custom_fields.vni) }}"
-          loop: "{{ tenants_to_remove }}"
+                                api_filter='id=' ~ item.custom_fields.tenant_l3vni.id) }}"
+          loop: "{{ tenants_to_remove_full }}"
           register: l3vni_results
 
         - set_fact:
             remove_l3vpns_flat: "{{ l3vni_results.results | map(attribute='ansible_facts.remove_l3vpns') | flatten }}"
 
+        # ---------------------------------------------------------------------
         # B. Remove VRF
+        # ---------------------------------------------------------------------
         - name: Remove Unused VRFs
           cisco.nxos.nxos_vrf:
             name: "{{ item.slug }}"
             state: absent
-          loop: "{{ tenants_to_remove }}"
+          loop: "{{ tenants_to_remove_full }}"
 
+        # ---------------------------------------------------------------------
         # C. Remove L3VNI SVI
+        # ---------------------------------------------------------------------
         - name: Remove Unused L3VNI SVIs
           cisco.nxos.nxos_interfaces:
             config:
@@ -198,7 +222,9 @@
           loop: "{{ remove_l3vpns_flat }}"
           when: o_map[item.custom_fields.vni | string] is defined
 
+        # ---------------------------------------------------------------------
         # D. Remove L3VNI from VTEP
+        # ---------------------------------------------------------------------
         - name: Remove Unused L3VNI from VTEP
           cisco.nxos.nxos_vxlan_vtep_vni:
             interface: nve1
@@ -206,7 +232,9 @@
             state: absent
           loop: "{{ remove_l3vpns_flat }}"
 
+        # ---------------------------------------------------------------------
         # E. Remove L3VNI VLAN
+        # ---------------------------------------------------------------------
         - name: Remove Unused L3VNI VLANs
           cisco.nxos.nxos_vlans:
             config:
@@ -215,11 +243,12 @@
           loop: "{{ remove_l3vpns_flat }}"
           when: o_map[item.custom_fields.vni | string] is defined
 
-        # F. Update local mapping variable so it doesn't get pushed back to NetBox
+        # ---------------------------------------------------------------------
+        # F. Update Mapping
+        # ---------------------------------------------------------------------
         - name: Update mapping to remove L3VNIs
           set_fact:
             mapping: "{{ mapping | rejectattr('key', 'in', (remove_l3vpns_flat | map(attribute='custom_fields.vni') | map('string') ) ) }}"
-            
       when: tenants_to_remove | length > 0
     # END OF TESTING
 
