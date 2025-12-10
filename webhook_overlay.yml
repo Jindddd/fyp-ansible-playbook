@@ -90,7 +90,7 @@
 
     - name: Filter VLANs to be removed based on IDs
       set_fact:
-        remove_l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', to_remove) | map(attribute='value') }}"     
+        remove_l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', to_remove) }}"     
     
     - name: Debug remove_l2vpns
       debug:
