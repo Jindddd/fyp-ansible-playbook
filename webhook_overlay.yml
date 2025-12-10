@@ -117,7 +117,8 @@
         all_device_interfaces: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
                                   api_endpoint=netbox_url,
                                   token=netbox_token,
-                                  api_filter='device=' ~ device_name) }}"
+                                  api_filter='device=' ~ device_name) 
+                                  | map(attribute='value') }}"
 
     - debug:
         var: all_device_interfaces
@@ -180,7 +181,7 @@
             tenants_to_remove_full: "{{ query('netbox.netbox.nb_lookup', 'tenants',
                                         api_endpoint=netbox_url,
                                         token=netbox_token,
-                                        api_filter='id__in=' ~ (tenants_to_remove | map(attribute='id') | join(',')) ) }}"
+                                        api_filter=(tenants_to_remove | map(attribute='id') | map('string') | map('regex_replace', '^', 'id=') | join('&')) }}"
 
         - debug:
             var: tenants_to_remove_full
