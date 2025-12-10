@@ -106,7 +106,7 @@
     - name: Remove unused L2VNIs SVIs
       cisco.nxos.nxos_interfaces:
         config:
-          - name: "vlan {{ o_map[item.vid | string] }}"
+          - name: "vlan {{ o_map[item.custom_fields.vni | string] }}"
         state: purged
       loop: "{{ remove_l2vpns }}"
     
