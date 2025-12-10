@@ -203,6 +203,8 @@
         - set_fact:
             remove_l3vpns_flat: "{{ l3vni_results.results | map(attribute='ansible_facts.remove_l3vpns') | flatten }}"
 
+        - debug:
+            var: remove_l3vpns_flat
         # ---------------------------------------------------------------------
         # B. Remove VRF
         # ---------------------------------------------------------------------
