@@ -142,7 +142,7 @@
         current_used_vlans_objects: "{{ query('netbox.netbox.nb_lookup', 'vlans',
                                         api_endpoint=netbox_url,
                                         token=netbox_token,
-                                        api_filter=(current_used_vlan_ids | map('string') | map('regex_replace', '^', 'id=') | join('&'))) }}"
+                                        api_filter=(current_used_vlan_ids | map('string') | map('regex_replace', '^', 'id=') | join(' ') ) ) }}"
       when: current_used_vlan_ids | length > 0
 
     - debug:
@@ -178,7 +178,7 @@
             tenants_to_remove_full: "{{ query('netbox.netbox.nb_lookup', 'tenants',
                                         api_endpoint=netbox_url,
                                         token=netbox_token,
-                                        api_filter=(tenants_to_remove | map(attribute='id') | map('string') | map('regex_replace', '^', 'id=') | join('&')) }}"
+                                        api_filter=(tenants_to_remove | map(attribute='id') | map('string') | map('regex_replace', '^', 'id=') | join(' ')) }}"
 
         - debug:
             var: tenants_to_remove_full
