@@ -90,11 +90,11 @@
 
     - name: Filter VLANs to be removed based on IDs
       set_fact:
-        remove_l2vpns: "{{ all_l2vpns | selectattr('id', 'in', to_remove) }}"     
+        remove_l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', to_remove) }}"     
     
     - name: Debug remove_l2vpns
       debug:
-        msg: "{{ remove_l2vpns }}"
+        var: remove_l2vpns
 
     - name: Convert mapping to o_map
       set_fact:
