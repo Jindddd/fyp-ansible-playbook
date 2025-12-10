@@ -103,6 +103,10 @@
     - debug:
         var: o_map
 
+    - debug:
+        msg: "{{ o_map[item.custom_fields.vni | string] }}"
+      loop: "{{ remove_l2vpns }}"
+
     - name: Remove unused L2VNIs SVIs
       cisco.nxos.nxos_interfaces:
         config:
@@ -126,7 +130,7 @@
     - name: Remove unused L2VNI VLANs
       cisco.nxos.nxos_vlans:
         config:
-          - vlan_id: "{{ o_map[item.vid | string] }}"
+          - vlan_id: "{{ o_map[item.custom_fields.vni | string] }}"
         state: deleted
       loop: "{{ remove_l2vpns }}"
 
