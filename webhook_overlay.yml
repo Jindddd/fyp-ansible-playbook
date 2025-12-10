@@ -120,9 +120,6 @@
                                   api_filter='device=' ~ device_name) 
                                   | map(attribute='value') }}"
 
-    - debug:
-        var: all_device_interfaces
-
     # 2. Extract the IDs of ALL VLANs currently assigned to these interfaces
     - name: Build list of VLAN IDs currently in use on this device
       set_fact:
