@@ -159,6 +159,8 @@
       set_fact:
         active_tenant_ids: "{{ current_used_vlans_objects | map(attribute='tenant.id') | unique }}"
 
+    - debug:
+        var: active_tenant_ids
     # 5. Determine which Tenants to remove
     #    (Candidate is removed ONLY if its ID is NOT in the active_tenant_ids list)
     - name: Calculate Tenants to Remove
@@ -168,7 +170,7 @@
     - debug:
         var: tenants_to_remove
 
-# 6. Proceed with Removal
+    # 6. Proceed with Removal
     - name: Process Removal of Unused Tenants
       block:
         # ---------------------------------------------------------------------
@@ -179,7 +181,7 @@
             tenants_to_remove_full: "{{ query('netbox.netbox.nb_lookup', 'tenants',
                                         api_endpoint=netbox_url,
                                         token=netbox_token,
-                                        api_filter=(tenants_to_remove | map(attribute='id') | map('string') | map('regex_replace', '^', 'id=') | join(' ')) }}"
+                                        api_filter=(tenants_to_remove | map(attribute='id') | map('string') | map('regex_replace', '^', 'id=') | join(' '))) }}"
 
         - debug:
             var: tenants_to_remove_full
@@ -188,15 +190,15 @@
         # ---------------------------------------------------------------------
         - name: Retrieve L3VNI VLAN Objects for removal
           set_fact:
-            # IMPORTANT: Ensure 'tenant_l3vni' is the correct field name in your NetBox.
-            # Your error snippet used 'vni', but your previous code used 'tenant_l3vni.id'.
-            # I am assuming 'tenant_l3vni' is the custom field holding the VLAN Object.
             remove_l3vpns: "{{ query('netbox.netbox.nb_lookup', 'vlans',
                                 api_endpoint=netbox_url,
                                 token=netbox_token,
                                 api_filter='id=' ~ item.custom_fields.tenant_l3vni.id) }}"
           loop: "{{ tenants_to_remove_full }}"
           register: l3vni_results
+
+        - debug:
+            var: l3vni_results
 
         - set_fact:
             remove_l3vpns_flat: "{{ l3vni_results.results | map(attribute='ansible_facts.remove_l3vpns') | flatten }}"
