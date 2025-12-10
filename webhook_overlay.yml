@@ -69,17 +69,6 @@
       prechange_vlan_ids: "{{ snapshots.prechange.untagged_vlan }}"
     when: snapshots.prechange.untagged_vlan is defined and (snapshots.prechange.untagged_vlan != 'None')
 
-  - name: DEBUG - Check what interfaces are still holding the prechange VLANs
-    debug:
-      msg: 
-        - "Checking VLAN ID (NetBox ID): {{ item }}"
-        - "Interfaces found: {{ query('netbox.netbox.nb_lookup', 'interfaces',
-                  api_endpoint=netbox_url,
-                  token=netbox_token,
-                  api_filter='device='+device_name+' vlan_id='+(item | string)) | map(attribute='value.name') | list }}"
-    loop: "{{ prechange_vlan_ids | difference(vlan_ids) }}"
-    when: snapshots.prechange.untagged_vlan is defined and (snapshots.prechange.untagged_vlan != 'None')
-
 # The vlan_id here is ID of the VLAN not VLAN number!
   - name: Remove unused L2VPNs
     block:
@@ -95,6 +84,15 @@
                   token=netbox_token,
                   api_filter='device='+device_name+' vlan_id='+(item | string)) | length == 0}}"
     
+    - name: Debug remove_l2vpns
+      debug:
+        msg: "{{ item }}"
+      loop: "{{ prechange_vlan_ids | difference(vlan_ids) }}"
+      when: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
+                  api_endpoint=netbox_url,
+                  token=netbox_token,
+                  api_filter='device='+device_name+' vlan_id='+(item | string)) | length == 0}}"
+
     - name: Filter VLANs to be removed based on IDs
       set_fact:
         remove_l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', to_remove) | map(attribute='value') }}"     
