@@ -84,14 +84,9 @@
                   token=netbox_token,
                   api_filter='device='+device_name+' vlan_id='+(item | string)) | length == 0}}"
     
-    - name: Debug query difference prechange_vlan_ids
+    - name: Debug to_remove
       debug:
-        msg: "{{ item }}"
-      loop: "{{ prechange_vlan_ids | difference(vlan_ids) }}"
-      when: "{{ query('netbox.netbox.nb_lookup', 'interfaces',
-                  api_endpoint=netbox_url,
-                  token=netbox_token,
-                  api_filter='device='+device_name+' vlan_id='+(item | string)) | length == 0}}"
+        var: to_remove
 
     - name: Filter VLANs to be removed based on IDs
       set_fact:
