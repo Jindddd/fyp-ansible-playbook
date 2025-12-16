@@ -37,9 +37,12 @@
           - sequence: 10
             action: permit
 
-- name: Configure SNMP Context
+- name: Configure SNMP Community and Context
   cisco.nxos.nxos_snmp_server:
     config:
+      communities:
+        - name: "public"
+          ro: true
       context:
           name: "management"
           vrf: "management"
@@ -47,9 +50,6 @@
 - name: Configure SNMP Server
   cisco.nxos.nxos_snmp_server:
     config:
-      communities:
-        - name: "public"
-          ro: true
       mib:
         community_map:
           community: "public"
