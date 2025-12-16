@@ -44,12 +44,12 @@
         - name: "public"
           ro: true
       context:
-        - name: "management"
+          name: "management"
           vrf: "management"
       mib:
         community_map:
-          - community: "public"
-          - context: "management"
+          community: "public"
+          context: "management"
       source_interface:
         - trap: "mgmt0"
     
