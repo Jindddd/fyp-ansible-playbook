@@ -37,7 +37,7 @@
           - sequence: 10
             action: permit
 
-- name: Configure SNMP Community
+- name: Configure SNMP Server
   cisco.nxos.nxos_snmp_server:
     communities:
       - name: "public"
