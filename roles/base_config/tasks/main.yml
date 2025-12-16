@@ -41,19 +41,19 @@
   cisco.nxos.nxos_snmp_server:
     config:
       communities:
-        - name: "public"
-          ro: true
+        - name: "underlay_ro"
+          grou: "network-operator"
       context:
-          name: "management"
-          vrf: "management"
+          name: "default"
+          vrf: "default"
 
 - name: Configure SNMP Server
   cisco.nxos.nxos_snmp_server:
     config:
       mib:
         community_map:
-          community: "public"
-          context: "management"
+          community: "underlay_ro"
+          context: "default"
       source_interface:
         traps: "mgmt0"
     
