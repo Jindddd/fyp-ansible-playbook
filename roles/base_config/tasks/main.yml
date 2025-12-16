@@ -51,7 +51,7 @@
           community: "public"
           context: "management"
       source_interface:
-        - trap: "mgmt0"
+        traps: "mgmt0"
     
 - name: Configure Logging Format to RFC 5424
   cisco.nxos.nxos_command:
