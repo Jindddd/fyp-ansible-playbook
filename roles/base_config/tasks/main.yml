@@ -42,7 +42,7 @@
     config:
       communities:
         - name: "underlay_ro"
-          grou: "network-operator"
+          group: "network-operator"
       context:
           name: "default"
           vrf: "default"
