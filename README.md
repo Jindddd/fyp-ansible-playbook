@@ -1,6 +1,5 @@
 # Automated Vxlan Spine-Leaf Fabric Provisioning With Dynamic Ip/Vni Management And Cloud-Based Monitoring
 This repository houses the automation engine for an Event-Driven VXLAN-EVPN Spine-Leaf Fabric, designed for scalable and observable data center operations. This project replaces traditional manual configuration with a modern Infrastructure-as-Code (IaC) approach, utilizing a centralized Source of Truth (SoT) to drive network state.
-+3
 
 ---
 ## 🚀 Key Project Objectives
