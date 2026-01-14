@@ -1,5 +1,5 @@
 # Automated Vxlan Spine-Leaf Fabric Provisioning With Dynamic Ip/Vni Management And Cloud-Based Monitoring
-This repository houses the automation engine for an Event-Driven VXLAN-EVPN Spine-Leaf Fabric, designed for scalable and observable data center operations. This project replaces traditional manual configuration with a modern Infrastructure-as-Code (IaC) approach, utilizing a centralized Source of Truth (SoT) to drive network state.
+This repository contains the Ansible playbooks for the project. It integrates with a remote Source of Truth (NetBox) and a CI/CD Frontend (Semaphore) to provision a 2x2 Cisco Nexus 9300 fabric. This project replaces traditional manual configuration with a modern Infrastructure-as-Code (IaC) approach, utilizing a centralized Source of Truth (SoT) to drive network state.
 
 ---
 ## 🚀 Key Project Objectives
