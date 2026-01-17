@@ -57,7 +57,7 @@
       source_interface:
         traps: "mgmt0"
     
-- name: Configure Logging Format to RFC 5424
+- name: Configure Logging Server
   cisco.nxos.nxos_command:
     commands:
       - configure terminal
