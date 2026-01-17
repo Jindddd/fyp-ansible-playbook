@@ -61,7 +61,7 @@
   cisco.nxos.nxos_command:
     commands:
       - configure terminal
-      - command: logging server 100.83.118.78 6 port 1514 use-vrf management
+      - command: logging server 100.80.150.44 6 port 1514 use-vrf management
 
 - name: Configure Logging Format to RFC 5424
   cisco.nxos.nxos_command:
