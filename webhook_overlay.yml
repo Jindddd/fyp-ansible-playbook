@@ -25,16 +25,6 @@
                     api_endpoint=netbox_url,
                     token=netbox_token) }}"
 
-  - name: Debug the mapping query
-    debug:
-      msg:
-        - "{{ ((lookup('netbox.netbox.nb_lookup', 'devices',
-                      api_endpoint=netbox_url,
-                      token=netbox_token,
-                      api_filter='name='+device_name
-                      ).value.custom_fields.vlan_vni_mapping) | default({}, true)
-                      ) | dict2items }}"
-
   - name: Retrieve existing VNI-VLAN ID mapping from Device object
     set_fact:
       mapping: "{{ ((lookup('netbox.netbox.nb_lookup', 'devices',
@@ -43,12 +33,6 @@
                     api_filter='name='+device_name
                     ).value.custom_fields.vlan_vni_mapping) | default({}, true)
                     ) | dict2items }}"
-
-  - name: Debug the variables
-    debug:
-      msg:
-        - "all_l2vpns: {{ all_l2vpns }}"
-        - "mapping: {{ mapping }}"
 
   - name: Retrieve used L2VPNs (VLAN objects on Netbox) from interface
     set_fact:
@@ -83,32 +67,18 @@
                   api_endpoint=netbox_url,
                   token=netbox_token,
                   api_filter='device='+device_name+' vlan_id='+(item | string)) | length == 0}}"
-    
-    - name: Debug to_remove
-      debug:
-        var: to_remove
 
     - name: Filter VLANs to be removed based on IDs
       set_fact:
         remove_l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', (to_remove | map('int') | list)) | map(attribute='value') }}"     
-    
-    - name: Debug remove_l2vpns
-      debug:
-        var: remove_l2vpns
 
     - name: Convert mapping to o_map
       set_fact:
         o_map: "{{ mapping | items2dict }}"
 
-    - debug:
-        var: o_map
-
     - name: Identify potentially unused Tenants
       set_fact:
         candidate_tenants: "{{ remove_l2vpns | map(attribute='tenant') | unique }}"
-
-    - debug:
-        var: candidate_tenants
 
     # TESTING REMOVING L3VNI VLANs AND VRFS
     # 1. Fetch ALL interfaces on this specific device to audit current usage
@@ -130,9 +100,6 @@
                                    | map(attribute='untagged_vlan.id') 
                                    | unique 
                                    | list }}"
-
-    - debug:
-        var: current_used_vlan_ids
 
     # 3. Fetch the full VLAN objects for these 'Used IDs'
     #    (We do this to get the 'tenant' field, which was missing in the interface API)
@@ -156,8 +123,6 @@
       set_fact:
         active_tenant_ids: "{{ current_used_vlans_objects | map(attribute='tenant.id') | unique }}"
 
-    - debug:
-        var: active_tenant_ids
     # 5. Determine which Tenants to remove
     #    (Candidate is removed ONLY if its ID is NOT in the active_tenant_ids list)
     - name: Calculate Tenants to Remove
@@ -177,8 +142,6 @@
                                         token=netbox_token,
                                         api_filter=(tenants_to_remove | map(attribute='id') | map('string') | map('regex_replace', '^', 'id=') | join(' '))) }}"
 
-        - debug:
-            var: tenants_to_remove_full
         # ---------------------------------------------------------------------
         # A. Get L3VNI Info using the FULL objects
         # ---------------------------------------------------------------------
@@ -191,14 +154,9 @@
           loop: "{{ tenants_to_remove_full }}"
           register: l3vni_results
 
-        - debug:
-            var: l3vni_results
-
         - set_fact:
             remove_l3vpns_flat: "{{ l3vni_results.results | map(attribute='ansible_facts.remove_l3vpns') | flatten }}"
 
-        - debug:
-            var: remove_l3vpns_flat
         # ---------------------------------------------------------------------
         # B. Remove VRF
         # ---------------------------------------------------------------------
@@ -286,10 +244,6 @@
     set_fact:
       l2vpns: "{{ all_l2vpns | selectattr('value.id', 'in', vlan_ids) | map(attribute='value') }}"
   
-  - name: Debug the l2vpns
-    debug:
-      var: l2vpns
-
   - name: Create list of used tenants
     set_fact:
       used_tenants: "{{ l2vpns | map(attribute='tenant.slug') | unique }}"
@@ -306,10 +260,6 @@
                     ) | map(attribute='value') | list }}"
     loop: "{{ used_tenants }}"
 
-  - name: Debug the tenants
-    debug:
-      var: tenants
-
   - name: Retrieve L3VNI VLAN objects for these Tenants
     set_fact:
       l3vpns: []
@@ -321,10 +271,6 @@
                     token=netbox_token,
                     api_filter='id=' ~ item.custom_fields.tenant_l3vni.id) }}"
     loop: "{{ tenants }}"
-
-  - name: Debug the l3vpns
-    debug:
-      var: l3vpns
 
   - name: Update VNI-VLAN ID mapping if needed
     set_fact:
